@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* Design tokens — see docs/02-design-system.md */
+/* Cool blue-gray monochrome, keyed to the hero portrait's
+   B&W office-glass tones so photo and page share one atmosphere. */
+:root {
+  --background: #0a0b0d;
+  --surface: #101216;
+  --border: #242933;
+  --foreground: #eceef2;
+  --muted: #9aa1ad;
+  --faint: #697180;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-line: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* offset anchors below the sticky nav */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* Scroll-reveal: hidden state only when JS has marked the element and
+   the user allows motion. No-JS visitors see everything immediately. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal-zoom {
+    transform: translateY(12px) scale(0.95);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Print / PDF export: light background, everything expanded, no chrome.
+   Generates the "export-ready PDF portfolio" via the browser's Print → PDF. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --border: #d4d4d8;
+    --foreground: #18181b;
+    --muted: #3f3f46;
+    --faint: #71717a;
+  }
+  header,
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  header[class] {
+    display: none; /* sticky nav is noise on paper */
+  }
+  details.deep-dive summary .chevron {
+    display: none;
+  }
+  section {
+    break-inside: avoid-page;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75em;
+    color: var(--faint);
+  }
+}
+
+/* Squash animation when a hero bug gets clicked */
+@keyframes splat-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  55% {
+    transform: scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.splat {
+  animation: splat-pop 2.6s ease-out forwards;
+}
+@keyframes splat-label-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.splat-label {
+  animation: splat-label-fade 2.6s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .splat {
+    animation: none;
+  }
+}
+
+/* Styled native accordion */
+details.deep-dive summary {
+  cursor: pointer;
+  list-style: none;
+}
+details.deep-dive summary::-webkit-details-marker {
+  display: none;
+}
+details.deep-dive summary .chevron {
+  transition: transform 0.2s ease;
+}
+details.deep-dive[open] summary .chevron {
+  transform: rotate(90deg);
+}
