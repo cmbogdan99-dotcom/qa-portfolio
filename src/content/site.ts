@@ -57,13 +57,13 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     number: "02",
-    name: "Senior coverage across AAA productions",
+    name: "Expert coverage across AAA productions",
     context: "Ubisoft · 2021 — 2025 · QC Tester → Quality Analyst Technician",
     challenge:
       "Productions like Assassin's Creed Shadows, Star Wars Outlaws, Assassin's Creed Valhalla, and Watch Dogs: Legion ship across PlayStation, Xbox, PC, and mobile, with a state-space no team can test exhaustively. Build cadence swung with context, from one or two builds a week in quiet phases to 8-10 a day near release.",
     approach: [
       "Worked in a strike-team model: rotated onto projects needing senior coverage, delivered analysis and reports, moved to the next.",
-      "As Quality Analyst Technician, covered specific features and areas sprint by sprint: coordinating a team of 15 expert testers, allocating tasks, tracking technical KPIs, and reporting to QC leadership.",
+      "As Quality Analyst Technician, covered specific features and areas sprint by sprint. On selected projects this included coordinating a team of 15 expert testers: allocating tasks, tracking technical KPIs, and reporting to QC leadership.",
       "Applied risk-based, functional, and non-functional testing to keep coverage meaningful when exhaustive testing was impossible.",
       "Supported milestone delivery, platform compliance, and certification across console generations, PC, and mobile.",
     ],
@@ -126,7 +126,7 @@ export const experience: Experience[] = [
       {
         title: "Quality Analyst Technician",
         period: "Jun 2024 — Aug 2025",
-        note: "Strike-team role: covered assigned features and areas across projects, coordinated a team of 15 expert testers, tracked KPIs, reported to QC leadership.",
+        note: "Strike-team role: expert coverage on assigned features and areas across projects; on selected projects also coordinated a team of 15 expert testers, with KPIs and reporting to QC leadership.",
       },
       {
         title: "QC Tester",
@@ -223,6 +223,8 @@ export type GalleryItem = {
   name: string;
   studio: string;
   detail: string;
+  /** Optional live link, shown as a "Visit" action on the card. */
+  href?: string;
 };
 
 export const gallery: GalleryItem[] = [
@@ -239,10 +241,10 @@ export const gallery: GalleryItem[] = [
   { slug: "ufc-4", name: "UFC 4", studio: "Electronic Arts", detail: "Fighting · PlayStation, Xbox" },
   { slug: "sugar-madness", name: "Sugar Madness", studio: "Avantaj Play", detail: "Casual game · VR, Browser" },
   { slug: "jolly-match-3", name: "Jolly Match 3", studio: "Avantaj Play", detail: "Puzzle · Mobile" },
-  { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · Mobile, VR/AR" },
+  { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · VR/AR" },
   { slug: "finance-ar", name: "Finance AR/MR Application", studio: "Avantaj Play", detail: "Finance tool · AR/MR, internal product" },
   { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal project", detail: "Test automation · Mobile games" },
-  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile" },
+  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile", href: "" /* [CONFIRM] add the live app URL */ },
 ];
 
 export const philosophyLine =

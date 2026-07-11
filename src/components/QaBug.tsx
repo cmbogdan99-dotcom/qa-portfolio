@@ -3,23 +3,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Beetles that live in the hero. Per-frame simulation with a small state
- * machine per bug:
+ * Beetles that live in the hero. Per-frame simulation, per-bug state machine:
  *
- * - roam:     ambles with a breathing speed rhythm, prefers hanging around
- *             the text (sometimes UNDER it, via z-index), pauses when idle.
- * - flee:     genuine panic when the cursor rushes at it; fear lingers
- *             after the threat stops. Approach slowly to catch one.
- * - hide:     chased too long without being caught? It slips under the
- *             portrait and the note reads "could not be reproduced".
- * - playdead: very rarely plays dead... then "issue is still present".
- * - stat:     very rarely sprints to the defects counter and adds one.
+ * - roam:  ambles with a breathing rhythm, prefers the text side, sometimes
+ *          slips UNDER the text or portrait (z-index), where it also slows
+ *          down. Scaring it while hidden pops it back in front.
+ * - flee:  panics when the cursor rushes at it; brief lingering fear, but
+ *          catchable — this is a toy, not a boss fight.
+ * - hide:  chased for a while? It walks to the portrait's edge, posts a
+ *          "could not be reproduced" report, then slides underneath.
+ * - stat:  very rarely (and only if the counter is on screen) sprints to
+ *          the defects counter and adds one.
  *
- * They multiply every minute, up to five. Clicking one closes it with a
- * quiet expanding ring. Counter starts at #1 and resets on refresh.
+ * The whole simulation pauses when the hero is off screen or the tab is in
+ * the background. They multiply every minute, up to five. Clicking one
+ * fades it out and files a tiny retro bug report. Counter resets on refresh.
  */
 
-type Mode = "roam" | "flee" | "hide" | "hidden" | "playdead" | "stat";
+type Mode = "roam" | "flee" | "hide" | "hidden" | "stat";
 
 type BugState = {
   id: number;
@@ -41,7 +42,8 @@ type BugState = {
   inner: HTMLSpanElement | null;
 };
 
-type Note = { id: number; x: number; y: number; text: string; ring: boolean };
+type Report = { id: number; x: number; y: number; title: string; text: string };
+type Ghost = { id: number; x: number; y: number; angle: number };
 
 let nextId = 1;
 let nextNoteId = 1;
@@ -75,14 +77,27 @@ export function QaBug() {
   const killsRef = useRef(0);
   const statCooldown = useRef(0);
   const hideCooldown = useRef(0);
+  const activeRef = useRef(true);
 
   const [bugIds, setBugIds] = useState<number[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [ghosts, setGhosts] = useState<Ghost[]>([]);
 
-  const addNote = useCallback((x: number, y: number, text: string, ring = false) => {
-    const note: Note = { id: nextNoteId++, x, y, text, ring };
-    setNotes((n) => [...n, note]);
-    window.setTimeout(() => setNotes((n) => n.filter((v) => v.id !== note.id)), 2600);
+  const addReport = useCallback((x: number, y: number, title: string, text: string) => {
+    const area = areaRef.current;
+    const w = area ? area.getBoundingClientRect().width : 600;
+    const report: Report = {
+      id: nextNoteId++,
+      x: Math.max(8, Math.min(x, w - 240)),
+      y: Math.max(4, y),
+      title,
+      text,
+    };
+    setReports((r) => [...r, report]);
+    window.setTimeout(
+      () => setReports((r) => r.filter((v) => v.id !== report.id)),
+      4200,
+    );
   }, []);
 
   const spawn = useCallback(() => {
@@ -94,20 +109,30 @@ export function QaBug() {
     setBugIds((ids) => [...ids, bug.id]);
   }, []);
 
-  // Rect of an element, in area coordinates. Used for the portrait
-  // hiding spot and the defects counter.
-  const rectOf = useCallback((selector: string) => {
+  // Rect of an element in area coordinates, or null when it is not
+  // currently visible in the viewport — stunts only happen on screen.
+  const visibleRectOf = useCallback((selector: string) => {
     const area = areaRef.current;
     const el = document.querySelector(selector);
     if (!area || !el) return null;
-    const a = area.getBoundingClientRect();
     const r = el.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) return null;
+    const a = area.getBoundingClientRect();
     return { x: r.left - a.left, y: r.top - a.top, w: r.width, h: r.height };
   }, []);
 
   useEffect(() => {
     spawn();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Pause the whole simulation while the hero is off screen.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        activeRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.05 },
+    );
+    if (areaRef.current) io.observe(areaRef.current);
 
     const onMouse = (e: MouseEvent) => {
       const area = areaRef.current;
@@ -126,7 +151,8 @@ export function QaBug() {
     window.addEventListener("mousemove", onMouse, { passive: true });
 
     const breeder = window.setInterval(() => {
-      if (bugsRef.current.length > 0 && bugsRef.current.length < 5) spawn();
+      if (activeRef.current && bugsRef.current.length > 0 && bugsRef.current.length < 5)
+        spawn();
     }, 60000);
 
     let raf = 0;
@@ -136,6 +162,7 @@ export function QaBug() {
       raf = requestAnimationFrame(step);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
+      if (!activeRef.current || document.hidden) return;
       const area = areaRef.current;
       if (!area) return;
       const { width: w, height: h } = area.getBoundingClientRect();
@@ -148,54 +175,64 @@ export function QaBug() {
         const distM = Math.hypot(dxm, dym);
         const closing = stale ? 0 : (-(m.vx * dxm) - m.vy * dym) / Math.max(distM, 1);
 
-        // A cursor rushing in causes real panic.
-        const threatened = distM < 200 && closing > 260;
-        if (threatened && bug.mode !== "hidden" && bug.mode !== "stat") {
+        // Only a genuinely fast lunge scares them.
+        const threatened = distM < 160 && closing > 380;
+        if (threatened && bug.mode !== "stat") {
+          if (bug.under || bug.mode === "hidden") bug.under = false; // pops out in front
           bug.mode = "flee";
-          bug.modeUntil = now + 1100 + Math.random() * 700; // fear lingers
+          bug.modeUntil = now + 650 + Math.random() * 350;
           bug.lastBother = now;
           bug.pauseUntil = 0;
         }
 
         if (bug.mode === "flee") {
           bug.chaseMs += dt * 1000;
-          // Keep re-aiming directly away from the cursor while afraid.
           const away = Math.atan2(dym, dxm) + (Math.random() - 0.5) * 0.4;
-          bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 240, 12), w - 12);
-          bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 240, 8), h - 8);
-          bug.targetSpeed = 300;
-          bug.under = false;
+          bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 200, 12), w - 12);
+          bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 200, 8), h - 8);
+          bug.targetSpeed = 165; // brisk, but catchable
           if (now > bug.modeUntil) {
-            // Chased for ages and never caught? Slip under the portrait.
-            const portrait = rectOf("[data-bug-hide]");
-            if (bug.chaseMs > 4500 && now > hideCooldown.current && portrait) {
-              hideCooldown.current = now + 25000;
+            const portrait = visibleRectOf("[data-bug-hide]");
+            if (bug.chaseMs > 5000 && now > hideCooldown.current && portrait) {
+              hideCooldown.current = now + 30000;
               bug.mode = "hide";
-              bug.tx = portrait.x + portrait.w / 2;
-              bug.ty = portrait.y + portrait.h / 2;
-              bug.targetSpeed = 260;
+              // Aim for the nearest edge of the portrait, not its middle,
+              // so it visibly slips underneath instead of vanishing.
+              const cx = portrait.x + portrait.w / 2;
+              const edgeX = bug.x < cx ? portrait.x + 6 : portrait.x + portrait.w - 6;
+              bug.tx = edgeX;
+              bug.ty = portrait.y + portrait.h * (0.3 + Math.random() * 0.4);
+              bug.targetSpeed = 110;
+              // File the report as it heads over, so there is time to read.
+              addReport(
+                portrait.x - 150,
+                portrait.y + portrait.h + 10,
+                "BUG-CHASE",
+                "issue could not be reproduced",
+              );
             } else {
               bug.mode = "roam";
               bug.chaseMs = Math.max(0, bug.chaseMs - 1500);
             }
           }
         } else if (bug.mode === "hide") {
+          bug.targetSpeed = 90;
           if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 10) {
-            bug.mode = "hidden";
-            bug.modeUntil = now + 3200 + Math.random() * 1500;
-            bug.under = true;
-            bug.targetSpeed = 0;
-            const portrait = rectOf("[data-bug-hide]");
+            const portrait = visibleRectOf("[data-bug-hide]");
             if (portrait) {
-              addNote(
-                Math.max(8, Math.min(portrait.x, w - 230)),
-                portrait.y + portrait.h + 8,
-                "issue could not be reproduced",
-              );
+              // Now slide a little way under the portrait, slowly.
+              bug.under = true;
+              bug.mode = "hidden";
+              bug.modeUntil = now + 3800 + Math.random() * 1500;
+              bug.tx = portrait.x + portrait.w * (0.35 + Math.random() * 0.3);
+              bug.ty = portrait.y + portrait.h / 2;
+              bug.targetSpeed = 40;
+            } else {
+              bug.mode = "roam";
             }
           }
         } else if (bug.mode === "hidden") {
-          bug.targetSpeed = 0;
+          if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) bug.targetSpeed = 0;
           if (now > bug.modeUntil) {
             bug.mode = "roam";
             bug.chaseMs = 0;
@@ -203,22 +240,9 @@ export function QaBug() {
             bug.tx = 12 + Math.random() * (w - 24);
             bug.ty = 8 + Math.random() * (h - 16);
           }
-        } else if (bug.mode === "playdead") {
-          bug.targetSpeed = 0;
-          if (bug.inner)
-            bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg) scaleY(-0.9)`;
-          if (now > bug.modeUntil) {
-            bug.mode = "roam";
-            addNote(
-              Math.max(8, Math.min(bug.x + 20, w - 260)),
-              bug.y,
-              "issue is still present · reopening",
-            );
-            if (bug.inner)
-              bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
-          }
         } else if (bug.mode === "stat") {
           bug.under = false;
+          bug.targetSpeed = 140;
           if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 10) {
             window.dispatchEvent(new CustomEvent("qa-bug-defect"));
             bug.mode = "roam";
@@ -233,20 +257,12 @@ export function QaBug() {
           if (uneasy) bug.lastBother = now;
 
           if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) {
-            // Rare stunts, only when the cursor is far away.
-            const roll = Math.random();
-            const statRect = rectOf("#defect-stat");
-            if (!uneasy && roll < 0.012 && now > statCooldown.current && statRect) {
+            const statRect = visibleRectOf("#defect-stat");
+            if (!uneasy && Math.random() < 0.012 && now > statCooldown.current && statRect) {
               statCooldown.current = now + 90000;
               bug.mode = "stat";
               bug.tx = statRect.x + statRect.w / 2;
               bug.ty = statRect.y + statRect.h / 2;
-              bug.targetSpeed = 150;
-              continue;
-            }
-            if (!uneasy && roll < 0.035) {
-              bug.mode = "playdead";
-              bug.modeUntil = now + 2400 + Math.random() * 1800;
               continue;
             }
             // New destination: prefer the text side, where a dark bug is
@@ -260,30 +276,33 @@ export function QaBug() {
             bug.under = textBias && Math.random() < 0.5;
           }
           if (uneasy && now > bug.pauseUntil) {
-            // Drifts away from a slowly approaching cursor.
             if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 20) {
               const away = Math.atan2(dym, dxm) + (Math.random() - 0.5);
               bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 90, 12), w - 12);
               bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 90, 8), h - 8);
             }
-            bug.targetSpeed = 60 + Math.random() * 25;
+            bug.targetSpeed = 55 + Math.random() * 20;
           } else {
             const base = idle > 12 ? 10 : 26;
             const breathe = 0.65 + 0.5 * Math.sin(now / 1400 + bug.phase * 3);
             bug.targetSpeed = now < bug.pauseUntil ? 0 : base * breathe + 4;
           }
+          // Under a covering element it creeps, half speed.
+          if (bug.under) bug.targetSpeed *= 0.5;
           bug.chaseMs = Math.max(0, bug.chaseMs - dt * 400);
         }
 
-        // Physics: accelerate, turn gradually, walk forward only.
-        bug.speed += (bug.targetSpeed - bug.speed) * Math.min(dt * 4, 1);
-        if (bug.speed > 1) {
-          const want = Math.atan2(bug.ty - bug.y, bug.tx - bug.x);
-          let turn = want - bug.heading;
-          while (turn > Math.PI) turn -= Math.PI * 2;
-          while (turn < -Math.PI) turn += Math.PI * 2;
-          const maxTurn = (bug.mode === "flee" ? 10 : 3.4) * dt;
-          bug.heading += Math.max(-maxTurn, Math.min(maxTurn, turn));
+        // Physics: pivot in place for sharp turns, then walk forward.
+        const want = Math.atan2(bug.ty - bug.y, bug.tx - bug.x);
+        let turn = want - bug.heading;
+        while (turn > Math.PI) turn -= Math.PI * 2;
+        while (turn < -Math.PI) turn += Math.PI * 2;
+        const sharpTurn = Math.abs(turn) > 1.0;
+        const effectiveTarget = sharpTurn ? Math.min(bug.targetSpeed, 8) : bug.targetSpeed;
+        bug.speed += (effectiveTarget - bug.speed) * Math.min(dt * 5, 1);
+        const maxTurn = (bug.mode === "flee" ? 12 : sharpTurn ? 7 : 3.4) * dt;
+        bug.heading += Math.max(-maxTurn, Math.min(maxTurn, turn));
+        if (bug.speed > 0.5) {
           bug.x += Math.cos(bug.heading) * bug.speed * dt;
           bug.y += Math.sin(bug.heading) * bug.speed * dt;
           bug.x = Math.min(Math.max(bug.x, 6), w - 6);
@@ -294,7 +313,7 @@ export function QaBug() {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
           bug.el.style.zIndex = bug.under ? "1" : "20";
         }
-        if (bug.inner && bug.mode !== "playdead")
+        if (bug.inner)
           bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
       }
     };
@@ -303,9 +322,10 @@ export function QaBug() {
     return () => {
       cancelAnimationFrame(raf);
       clearInterval(breeder);
+      io.disconnect();
       window.removeEventListener("mousemove", onMouse);
     };
-  }, [spawn, rectOf, addNote]);
+  }, [spawn, visibleRectOf, addReport]);
 
   const kill = (id: number) => {
     const bug = bugsRef.current.find((b) => b.id === id);
@@ -313,9 +333,29 @@ export function QaBug() {
     bugsRef.current = bugsRef.current.filter((b) => b.id !== id);
     setBugIds((ids) => ids.filter((i) => i !== id));
     killsRef.current += 1;
-    addNote(bug.x + 16, bug.y - 6, `bug #${killsRef.current} · closed`, true);
+    // The bug fades out in place...
+    const ghost: Ghost = {
+      id: bug.id,
+      x: bug.x,
+      y: bug.y,
+      angle: (bug.heading * 180) / Math.PI + 90,
+    };
+    setGhosts((g) => [...g, ghost]);
+    window.setTimeout(() => setGhosts((g) => g.filter((v) => v.id !== ghost.id)), 700);
+    // ...and a tiny report gets filed.
+    addReport(bug.x + 18, bug.y - 10, `BUG-${killsRef.current}`, "status: closed · verified");
     if (bugsRef.current.length === 0) window.setTimeout(spawn, 4000);
   };
+
+  const bugSvg = (
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none" className="text-faint transition-colors hover:text-muted">
+      <path d="M7 3.5L5.5 1.5M13 3.5l1.5-2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+      <path d="M4.5 8L2 6.5M4.5 11H1.5M4.5 14L2 15.5M15.5 8L18 6.5M15.5 11h3M15.5 14l2.5 1.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+      <ellipse cx="10" cy="11" rx="5.5" ry="7" fill="currentColor" opacity="0.85" />
+      <circle cx="10" cy="4.5" r="2.2" fill="currentColor" />
+      <path d="M10 5.5v12" stroke="var(--background)" strokeWidth="0.8" />
+    </svg>
+  );
 
   return (
     <div
@@ -341,30 +381,37 @@ export function QaBug() {
               const bug = bugsRef.current.find((b) => b.id === id);
               if (bug) bug.inner = el;
             }}
-            className="block transition-transform duration-300"
+            className="block"
           >
-            <svg width="17" height="17" viewBox="0 0 20 20" fill="none" className="text-faint transition-colors hover:text-muted">
-              <path d="M7 3.5L5.5 1.5M13 3.5l1.5-2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-              <path d="M4.5 8L2 6.5M4.5 11H1.5M4.5 14L2 15.5M15.5 8L18 6.5M15.5 11h3M15.5 14l2.5 1.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-              <ellipse cx="10" cy="11" rx="5.5" ry="7" fill="currentColor" opacity="0.85" />
-              <circle cx="10" cy="4.5" r="2.2" fill="currentColor" />
-              <path d="M10 5.5v12" stroke="var(--background)" strokeWidth="0.8" />
-            </svg>
+            {bugSvg}
           </span>
         </button>
       ))}
 
-      {notes.map((n) => (
-        <div
-          key={n.id}
-          className="absolute z-30"
-          style={{ left: 0, top: 0, transform: `translate(${n.x}px, ${n.y}px)` }}
+      {ghosts.map((g) => (
+        <span
+          key={`ghost-${g.id}`}
+          className="bug-ghost absolute z-20 block"
+          style={{ transform: `translate(${g.x - 8}px, ${g.y - 8}px) rotate(${g.angle}deg)` }}
         >
-          {n.ring && (
-            <span className="bug-ring absolute -left-7 top-0 block h-5 w-5 rounded-full border border-faint" />
-          )}
-          <p className="splat-label whitespace-nowrap rounded bg-background/85 px-1.5 py-0.5 font-mono text-[12px] text-faint">
-            {n.text}
+          {bugSvg}
+        </span>
+      ))}
+
+      {reports.map((r) => (
+        <div
+          key={r.id}
+          className="bug-report absolute z-30 w-56 overflow-hidden rounded-sm border border-faint/60 bg-surface shadow-[3px_3px_0_rgba(0,0,0,0.45)]"
+          style={{ left: 0, top: 0, transform: `translate(${r.x}px, ${r.y}px)` }}
+        >
+          <div className="flex items-center justify-between border-b border-line bg-background/80 px-2 py-1">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+              {r.title}
+            </span>
+            <span className="font-mono text-[11px] leading-none text-faint">×</span>
+          </div>
+          <p className="px-2 py-1.5 font-mono text-[11px] leading-relaxed text-muted">
+            {r.text}
           </p>
         </div>
       ))}

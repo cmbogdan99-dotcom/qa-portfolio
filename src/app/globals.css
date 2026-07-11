@@ -106,19 +106,38 @@ img {
   }
 }
 
-/* Quiet expanding ring when a hero bug gets clicked */
-@keyframes bug-ring-expand {
+/* A clicked bug simply fades out in place */
+@keyframes bug-ghost-out {
   0% {
-    transform: scale(0.3);
-    opacity: 0.8;
+    opacity: 0.9;
   }
   100% {
-    transform: scale(1.9);
     opacity: 0;
   }
 }
-.bug-ring {
-  animation: bug-ring-expand 0.9s ease-out forwards;
+.bug-ghost {
+  animation: bug-ghost-out 0.6s ease-out forwards;
+}
+
+/* Retro bug-report dialog: pops in, lingers, fades */
+@keyframes bug-report-in {
+  0% {
+    opacity: 0;
+    scale: 0.92;
+  }
+  8% {
+    opacity: 1;
+    scale: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.bug-report {
+  animation: bug-report-in 4.2s ease-out forwards;
 }
 
 /* Defects counter pop when a bug sneaks one in */
@@ -136,18 +155,6 @@ img {
 }
 .stat-pop {
   animation: stat-pop-kf 0.6s ease-out;
-}
-@keyframes splat-label-fade {
-  0%,
-  70% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-.splat-label {
-  animation: splat-label-fade 2.6s ease-out forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .splat {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { caseStudies, earlierWork } from "@/content/site";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
@@ -68,14 +69,17 @@ export function Projects() {
 
       <Reveal>
         <p className="mt-10 text-sm leading-relaxed text-faint">{earlierWork}</p>
-        <p className="mt-4 text-sm">
-          <a
+        <div className="mt-6">
+          <Link
             href="/projects"
-            className="text-muted underline underline-offset-4 hover:text-foreground"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
           >
-            See every project I have worked on →
-          </a>
-        </p>
+            See every project I have worked on
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M8.5 3.5L13 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        </div>
       </Reveal>
     </Section>
   );

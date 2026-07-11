@@ -107,11 +107,23 @@ export default function ProjectsPage() {
                             </div>
                           )}
                         </div>
-                        <div className="border-t border-line p-5">
-                          <h3 className="text-[15px] font-medium tracking-tight text-foreground">
-                            {item.name}
-                          </h3>
-                          <p className="mt-1 text-[13px] text-faint">{item.detail}</p>
+                        <div className="flex items-center justify-between gap-3 border-t border-line p-5">
+                          <div>
+                            <h3 className="text-[15px] font-medium tracking-tight text-foreground">
+                              {item.name}
+                            </h3>
+                            <p className="mt-1 text-[13px] text-faint">{item.detail}</p>
+                          </div>
+                          {item.href && (
+                            <a
+                              href={item.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-[13px] text-muted transition-colors hover:border-faint hover:text-foreground"
+                            >
+                              Visit ↗
+                            </a>
+                          )}
                         </div>
                       </article>
                     </Reveal>
@@ -122,14 +134,17 @@ export default function ProjectsPage() {
           );
         })}
 
-        <p className="mt-16 text-sm text-faint">
+        <div className="mt-16">
           <Link
             href="/"
-            className="text-muted underline underline-offset-4 hover:text-foreground"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
           >
-            ← Back to the main page
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M13 8H3M7.5 3.5L3 8l4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back to overview
           </Link>
-        </p>
+        </div>
       </main>
     </>
   );
