@@ -170,7 +170,7 @@ export const expertise: ExpertiseCategory[] = [
   },
   {
     title: "Automation & Tooling",
-    body: "A working automation foundation: C#, Python, Unity Test Framework, and AltTester in production use today. Currently building depth in Playwright, Postman, and Cypress, plus CI/CD pipelines.",
+    body: "A working automation foundation: C#, Python, Unity Test Framework, and AltTester in production use today. Currently building depth in Playwright and Postman, plus CI/CD pipelines.",
     tags: ["C#", "Python", "Unity Test Framework", "AltTester", "Playwright", "Postman", "Jenkins", "Git"],
   },
   {
@@ -264,13 +264,7 @@ export const gallery: GalleryItem[] = [
   { slug: "avatar", name: "Avatar: Frontiers of Pandora", studio: "Ubisoft", detail: "Open-world action · PS5, Xbox Series, PC" },
   { slug: "rainbow-six-siege", name: "Rainbow Six Siege", studio: "Ubisoft", detail: "Tactical shooter · PlayStation, Xbox, PC" },
   { slug: "skull-and-bones", name: "Skull and Bones", studio: "Ubisoft", detail: "Naval action · PS5, Xbox Series, PC" },
-  {
-    slug: "crew-motorfest",
-    name: "The Crew Motorfest",
-    studio: "Ubisoft",
-    detail: "Open-world racing · PlayStation, Xbox, PC",
-    dlc: [{ slug: "crew-motorfest-year-1-pass", name: "Year 1 Pass" }],
-  },
+  { slug: "crew-motorfest", name: "The Crew Motorfest", studio: "Ubisoft", detail: "Open-world racing · PlayStation, Xbox, PC" },
   { slug: "fifa-20", name: "FIFA 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "madden-20", name: "Madden NFL 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "ufc-4", name: "UFC 4", studio: "Electronic Arts", detail: "Fighting · PlayStation, Xbox" },

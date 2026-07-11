@@ -49,6 +49,16 @@ type Splat = { id: number; x: number; y: number; r: number };
 let nextId = 1;
 let nextNoteId = 1;
 
+const killMessages = [
+  "no longer reproducible on latest build",
+  "fix confirmed — closing ticket",
+  "regression check passed",
+  "retested. clean.",
+  "dev fix accepted — closing",
+  "cannot reproduce after patch",
+  "verified fixed in HEAD",
+];
+
 function makeBug(w: number, h: number, now: number): BugState {
   return {
     id: nextId++,
@@ -313,7 +323,10 @@ export function QaBug() {
 
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
-          bug.el.style.zIndex = bug.under ? "1" : "30";
+          // Only truly hide behind the portrait during the explicit "hidden" mode.
+          // Roaming bugs marked `under` are dimmed but stay in front so they stay clickable.
+          bug.el.style.zIndex = bug.mode === "hidden" ? "1" : "30";
+          bug.el.style.opacity = bug.mode === "hidden" ? "0.15" : bug.under ? "0.35" : "1";
         }
         if (bug.inner)
           bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
@@ -349,7 +362,8 @@ export function QaBug() {
     setSplats((s) => [...s, splat]);
     window.setTimeout(() => setSplats((s) => s.filter((v) => v.id !== splat.id)), 5200);
     // ...and a tiny report gets filed.
-    addReport(bug.x + 18, bug.y - 10, `BUG-${killsRef.current}`, "status: closed · verified");
+    const msg = killMessages[Math.floor(Math.random() * killMessages.length)];
+    addReport(bug.x + 18, bug.y - 10, `BUG-${killsRef.current}`, msg);
     if (bugsRef.current.length === 0) window.setTimeout(spawn, 4000);
   };
 
@@ -397,7 +411,7 @@ export function QaBug() {
       {ghosts.map((g) => (
         <span
           key={`ghost-${g.id}`}
-          className="bug-ghost absolute z-30 block"
+          className="bug-ghost absolute z-50 block"
           style={{ transform: `translate(${g.x - 8}px, ${g.y - 8}px) rotate(${g.angle}deg)` }}
         >
           {bugSvg}
@@ -407,7 +421,7 @@ export function QaBug() {
       {splats.map((s) => (
         <svg
           key={`splat-${s.id}`}
-          className="bug-splat absolute z-2"
+          className="bug-splat absolute z-50"
           width={s.r * 4}
           height={s.r * 4}
           viewBox="-10 -10 20 20"
@@ -427,7 +441,7 @@ export function QaBug() {
       {reports.map((r) => (
         <div
           key={r.id}
-          className="bug-report absolute z-30 w-56 overflow-hidden rounded-sm border border-faint/60 bg-surface shadow-[3px_3px_0_rgba(0,0,0,0.45)]"
+          className="bug-report absolute z-50 w-56 overflow-hidden rounded-sm border border-faint/60 bg-surface shadow-[3px_3px_0_rgba(0,0,0,0.45)]"
           style={{ left: 0, top: 0, transform: `translate(${r.x}px, ${r.y}px)` }}
         >
           <div className="flex items-center justify-between border-b border-line bg-background/80 px-2 py-1">

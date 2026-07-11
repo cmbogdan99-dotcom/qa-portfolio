@@ -9,23 +9,6 @@ interface Props {
   img: string | null;
 }
 
-function DlcCard({ name, img }: { name: string; img: string | null }) {
-  return (
-    <div className="min-w-[140px] max-w-[160px] shrink-0 rounded-xl border border-line bg-surface shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
-        {img ? (
-          <Image src={img} alt={name} fill quality={80} sizes="160px" className="object-cover grayscale" />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-surface to-background p-3">
-            <p className="text-center font-mono text-[10px] uppercase tracking-[0.15em] text-faint">{name}</p>
-          </div>
-        )}
-      </div>
-      <p className="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-faint leading-snug">{name}</p>
-    </div>
-  );
-}
-
 export function GalleryCard({ item, img }: Props) {
   const [open, setOpen] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,6 +33,30 @@ export function GalleryCard({ item, img }: Props) {
       onTouchEnd={cancelPress}
       onTouchMove={cancelPress}
     >
+      {/* DLC tooltip: floats ABOVE the card so it never overlaps the row below */}
+      {hasDlc && (
+        <div
+          aria-hidden="true"
+          className={`absolute bottom-full left-0 z-50 mb-2 min-w-[180px] max-w-full rounded-xl border border-line bg-surface/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.6)] backdrop-blur-sm transition-all duration-150 ${
+            open ? "pointer-events-none translate-y-0 opacity-100" : "pointer-events-none translate-y-1 opacity-0"
+          }`}
+        >
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-faint">
+            Expansions
+          </p>
+          <ul className="space-y-1.5">
+            {item.dlc!.map((d) => (
+              <li key={d.slug} className="flex items-center gap-2">
+                <span className="h-px w-3 shrink-0 bg-faint/50" />
+                <span className="text-[13px] text-muted">{d.name}</span>
+              </li>
+            ))}
+          </ul>
+          {/* downward arrow */}
+          <div className="absolute -bottom-[5px] left-5 h-[9px] w-[9px] rotate-45 border-b border-r border-line bg-surface/95" />
+        </div>
+      )}
+
       <article className="group rounded-2xl border border-line bg-surface transition duration-300 hover:z-20 hover:-translate-y-1 hover:border-faint hover:shadow-[0_24px_48px_-16px_rgba(0,0,0,0.7)]">
         <div className="relative aspect-[16/9] [perspective:700px]">
           {img ? (
@@ -109,24 +116,6 @@ export function GalleryCard({ item, img }: Props) {
           </div>
         </div>
       </article>
-
-      {/* DLC expansion tray */}
-      {hasDlc && (
-        <div
-          className={`absolute left-0 right-0 z-40 mt-2 transition-all duration-200 ${
-            open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
-          }`}
-        >
-          <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-faint px-1">
-            Expansions
-          </p>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {item.dlc!.map((d) => (
-              <DlcCard key={d.slug} name={d.name} img={null} />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
