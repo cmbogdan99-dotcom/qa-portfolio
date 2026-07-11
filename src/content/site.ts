@@ -278,3 +278,9 @@ export const gallery: GalleryItem[] = [
 
 export const philosophyLine =
   "Testing is risk management. Everything else is technique.";
+
+export const availability = {
+  open: true,
+  // Edit these roles to match what you're currently looking for.
+  roles: ["Senior QA Engineer", "QA Automation Engineer", "QA Lead"],
+};

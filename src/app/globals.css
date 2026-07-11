@@ -12,6 +12,27 @@
   --faint: #697180;
 }
 
+[data-theme="light"] {
+  --background: #f2f4f7;
+  --surface: #ffffff;
+  --border: #dde1e8;
+  --foreground: #0d0f12;
+  --muted: #4b5362;
+  --faint: #8b96a6;
+}
+
+/* Smooth theme switch — class applied for 350 ms on <html> then removed */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -168,6 +189,16 @@ img {
   .splat {
     animation: none;
   }
+}
+
+/* Konami: all bugs do a quick spin */
+@keyframes konami-spin-kf {
+  0%   { transform: scale(1) rotate(0deg); }
+  30%  { transform: scale(1.4) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+.konami-spin {
+  animation: konami-spin-kf 0.9s ease-in-out forwards !important;
 }
 
 /* Styled native accordion */

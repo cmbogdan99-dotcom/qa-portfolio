@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { identity, stats } from "@/content/site";
+import { identity, stats, availability } from "@/content/site";
 import { QaBug } from "./QaBug";
 import { DefectCounter } from "./DefectCounter";
+import { CountUp } from "./CountUp";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -30,6 +31,14 @@ export function Hero() {
                 <h1 className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
                   {identity.name}
                 </h1>
+                {availability.open && (
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-800/40 bg-emerald-950/30 px-3 py-1 [data-theme='light']:border-emerald-300/60 [data-theme='light']:bg-emerald-50">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-emerald-400/80">
+                      {availability.roles.join(" · ")}
+                    </span>
+                  </div>
+                )}
               </div>
               {hasPortrait && (
                 <Image
@@ -82,7 +91,17 @@ export function Hero() {
                 id={stat.label === "defects reported" ? "defect-stat" : undefined}
                 className="text-3xl font-semibold tracking-tight text-foreground"
               >
-                {stat.label === "defects reported" ? <DefectCounter /> : stat.value}
+                {stat.label === "defects reported" ? (
+                  <DefectCounter />
+                ) : stat.value === "5+" ? (
+                  <CountUp to={5} suffix="+" duration={900} />
+                ) : stat.value === "7" ? (
+                  <CountUp to={7} duration={700} />
+                ) : stat.value === "15+" ? (
+                  <CountUp to={15} suffix="+" duration={1000} />
+                ) : (
+                  stat.value
+                )}
               </dd>
               <p aria-hidden="true" className="mt-1 text-sm text-faint">
                 {stat.label}

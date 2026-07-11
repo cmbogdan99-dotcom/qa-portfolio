@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 const items = [
   { href: "/#about", label: "About" },
@@ -28,8 +29,6 @@ export function Nav() {
         <Link
           href="/"
           onClick={(e) => {
-            // Same-page: scroll to top ourselves; a hash link won't
-            // re-trigger once the hash is already set.
             if (pathname === "/") {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -48,6 +47,7 @@ export function Nav() {
           </svg>
         </Link>
 
+        {/* Desktop nav */}
         <ul className="hidden items-center gap-7 md:flex">
           {items.map((item) => (
             <li key={item.href}>
@@ -55,33 +55,38 @@ export function Nav() {
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
                 className={`rounded-sm text-[13.5px] tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-faint ${
-                  isActive(item.href)
-                    ? "text-foreground"
-                    : "text-muted hover:text-foreground"
+                  isActive(item.href) ? "text-foreground" : "text-muted hover:text-foreground"
                 }`}
               >
                 {item.label}
               </Link>
             </li>
           ))}
+          <li>
+            <ThemeToggle />
+          </li>
         </ul>
 
-        <button
-          type="button"
-          className="-mr-2 flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground md:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            {open ? (
-              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" />
-            ) : (
-              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" />
-            )}
-          </svg>
-        </button>
+        {/* Mobile: theme toggle + hamburger */}
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="-mr-2 flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              {open ? (
+                <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" />
+              ) : (
+                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" />
+              )}
+            </svg>
+          </button>
+        </div>
       </nav>
 
       {open && (

@@ -167,6 +167,22 @@ export function QaBug() {
         spawn();
     }, 60000);
 
+    // Shift+B: spawn up to the cap immediately
+    const onSpawn = () => {
+      if (bugsRef.current.length < 5) spawn();
+    };
+    window.addEventListener("qa-bug-spawn", onSpawn);
+
+    // Konami: all bugs briefly spin (CSS class toggle)
+    const onKonami = () => {
+      for (const bug of bugsRef.current) {
+        if (!bug.el) continue;
+        bug.el.classList.add("konami-spin");
+        setTimeout(() => bug.el?.classList.remove("konami-spin"), 900);
+      }
+    };
+    window.addEventListener("qa-bug-konami", onKonami);
+
     let raf = 0;
     let last = performance.now();
 
@@ -339,6 +355,8 @@ export function QaBug() {
       clearInterval(breeder);
       io.disconnect();
       window.removeEventListener("mousemove", onMouse);
+      window.removeEventListener("qa-bug-spawn", onSpawn);
+      window.removeEventListener("qa-bug-konami", onKonami);
     };
   }, [spawn, visibleRectOf, addReport]);
 
