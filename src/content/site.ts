@@ -100,7 +100,7 @@ export const caseStudies: CaseStudy[] = [
 ];
 
 export const earlierWork =
-  "Earlier: Quality Controller at Electronic Arts (contact person for the FIFA 20 demo, plus Madden NFL 20 and UFC 4). Other Ubisoft titles include Avatar: Frontiers of Pandora, Rainbow Six, Skull and Bones, and The Crew Motorfest.";
+  "Earlier: Quality Controller at Electronic Arts (contact person for the FIFA 20 demo, plus Madden NFL 20 and UFC 4). Other Ubisoft titles include Avatar: Frontiers of Pandora, Rainbow Six Siege, Skull and Bones, and The Crew Motorfest.";
 
 export type Role = { title: string; period: string; note?: string };
 
@@ -161,7 +161,7 @@ export const expertise: ExpertiseCategory[] = [
   {
     title: "Execution & Defect Management",
     body: "10,000+ defects reported across my career. Reproducible reports, calibrated severity, and a defect lifecycle managed through to verified fixes.",
-    tags: ["Exploratory testing", "Regression", "API testing", "SQL", "Jira", "TestRail", "Xray"],
+    tags: ["Exploratory testing", "Regression", "API testing", "SQL", "Jira", "TestRail", "Xray", "Equivalence partitioning", "Boundary value analysis", "Decision tables", "State transition", "Static testing"],
   },
   {
     title: "Platforms & Certification",
@@ -170,8 +170,8 @@ export const expertise: ExpertiseCategory[] = [
   },
   {
     title: "Automation & Tooling",
-    body: "A working automation foundation: C#, Python, Unity Test Framework, and AltTester in production use today. Currently learning Playwright, Selenium, Postman, and Cypress, plus CI/CD pipelines.",
-    tags: ["C#", "Python", "Unity Test Framework", "AltTester", "Jenkins", "Git"],
+    body: "A working automation foundation: C#, Python, Unity Test Framework, and AltTester in production use today. Currently building depth in Playwright, Postman, and Cypress, plus CI/CD pipelines.",
+    tags: ["C#", "Python", "Unity Test Framework", "AltTester", "Playwright", "Postman", "Jenkins", "Git"],
   },
   {
     title: "People & Process",
@@ -218,6 +218,11 @@ export const deepDives: DeepDive[] = [
   },
 ];
 
+export type DlcItem = {
+  slug: string;
+  name: string;
+};
+
 export type GalleryItem = {
   slug: string;
   name: string;
@@ -225,17 +230,47 @@ export type GalleryItem = {
   detail: string;
   /** Optional live link, shown as a "Visit" action on the card. */
   href?: string;
+  /** DLC / expansion sub-cards shown on hover. */
+  dlc?: DlcItem[];
 };
 
 export const gallery: GalleryItem[] = [
-  { slug: "ac-shadows", name: "Assassin's Creed Shadows", studio: "Ubisoft", detail: "Open-world action · PS5, Xbox Series, PC" },
-  { slug: "star-wars-outlaws", name: "Star Wars Outlaws", studio: "Ubisoft", detail: "Open-world action · PS5, Xbox Series, PC" },
-  { slug: "ac-valhalla", name: "Assassin's Creed Valhalla", studio: "Ubisoft", detail: "Open-world action · PlayStation, Xbox, PC, Stadia" },
+  {
+    slug: "ac-shadows",
+    name: "Assassin's Creed Shadows",
+    studio: "Ubisoft",
+    detail: "Open-world action · PS5, Xbox Series, PC",
+    dlc: [{ slug: "ac-shadows-claws-of-awaji", name: "Claws of Awaji" }],
+  },
+  {
+    slug: "star-wars-outlaws",
+    name: "Star Wars Outlaws",
+    studio: "Ubisoft",
+    detail: "Open-world action · PS5, Xbox Series, PC",
+    dlc: [{ slug: "star-wars-outlaws-wild-card", name: "Wild Card" }],
+  },
+  {
+    slug: "ac-valhalla",
+    name: "Assassin's Creed Valhalla",
+    studio: "Ubisoft",
+    detail: "Open-world action · PlayStation, Xbox, PC, Stadia",
+    dlc: [
+      { slug: "ac-valhalla-wrath-of-the-druids", name: "Wrath of the Druids" },
+      { slug: "ac-valhalla-siege-of-paris", name: "The Siege of Paris" },
+      { slug: "ac-valhalla-dawn-of-ragnarok", name: "Dawn of Ragnarök" },
+    ],
+  },
   { slug: "watch-dogs-legion", name: "Watch Dogs: Legion", studio: "Ubisoft", detail: "Open-world action · PlayStation, Xbox, PC, Stadia" },
   { slug: "avatar", name: "Avatar: Frontiers of Pandora", studio: "Ubisoft", detail: "Open-world action · PS5, Xbox Series, PC" },
-  { slug: "rainbow-six", name: "Rainbow Six", studio: "Ubisoft", detail: "Tactical shooter · PlayStation, Xbox, PC" },
+  { slug: "rainbow-six-siege", name: "Rainbow Six Siege", studio: "Ubisoft", detail: "Tactical shooter · PlayStation, Xbox, PC" },
   { slug: "skull-and-bones", name: "Skull and Bones", studio: "Ubisoft", detail: "Naval action · PS5, Xbox Series, PC" },
-  { slug: "crew-motorfest", name: "The Crew Motorfest", studio: "Ubisoft", detail: "Open-world racing · PlayStation, Xbox, PC" },
+  {
+    slug: "crew-motorfest",
+    name: "The Crew Motorfest",
+    studio: "Ubisoft",
+    detail: "Open-world racing · PlayStation, Xbox, PC",
+    dlc: [{ slug: "crew-motorfest-year-1-pass", name: "Year 1 Pass" }],
+  },
   { slug: "fifa-20", name: "FIFA 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "madden-20", name: "Madden NFL 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "ufc-4", name: "UFC 4", studio: "Electronic Arts", detail: "Fighting · PlayStation, Xbox" },
@@ -244,7 +279,7 @@ export const gallery: GalleryItem[] = [
   { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · VR/AR" },
   { slug: "finance-ar", name: "Finance AR/MR Application", studio: "Avantaj Play", detail: "Finance tool · AR/MR, internal product" },
   { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal project", detail: "Test automation · Mobile games" },
-  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile", href: "" /* [CONFIRM] add the live app URL */ },
+  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile", href: "https://cmbogdan99-dotcom.github.io/dltate/" },
 ];
 
 export const philosophyLine =

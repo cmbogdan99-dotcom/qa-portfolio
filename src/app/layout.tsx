@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { identity } from "@/content/site";
 import { BackToTop } from "@/components/BackToTop";
+import { ConsoleEgg } from "@/components/ConsoleEgg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://bogdan-carcadea.vercel.app"; // free Vercel subdomain; swap if a custom domain is added later
+const siteUrl = "https://qa-portfolio-six-psi.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <BackToTop />
+        <ConsoleEgg />
       </body>
     </html>
   );

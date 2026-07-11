@@ -44,6 +44,7 @@ type BugState = {
 
 type Report = { id: number; x: number; y: number; title: string; text: string };
 type Ghost = { id: number; x: number; y: number; angle: number };
+type Splat = { id: number; x: number; y: number; r: number };
 
 let nextId = 1;
 let nextNoteId = 1;
@@ -82,6 +83,7 @@ export function QaBug() {
   const [bugIds, setBugIds] = useState<number[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [ghosts, setGhosts] = useState<Ghost[]>([]);
+  const [splats, setSplats] = useState<Splat[]>([]);
 
   const addReport = useCallback((x: number, y: number, title: string, text: string) => {
     const area = areaRef.current;
@@ -311,7 +313,7 @@ export function QaBug() {
 
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
-          bug.el.style.zIndex = bug.under ? "1" : "20";
+          bug.el.style.zIndex = bug.under ? "1" : "30";
         }
         if (bug.inner)
           bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
@@ -341,7 +343,11 @@ export function QaBug() {
       angle: (bug.heading * 180) / Math.PI + 90,
     };
     setGhosts((g) => [...g, ghost]);
-    window.setTimeout(() => setGhosts((g) => g.filter((v) => v.id !== ghost.id)), 700);
+    window.setTimeout(() => setGhosts((g) => g.filter((v) => v.id !== ghost.id)), 400);
+    // Leave a persistent splat mark that fades over 5 s.
+    const splat: Splat = { id: bug.id, x: bug.x, y: bug.y, r: 6 + Math.random() * 5 };
+    setSplats((s) => [...s, splat]);
+    window.setTimeout(() => setSplats((s) => s.filter((v) => v.id !== splat.id)), 5200);
     // ...and a tiny report gets filed.
     addReport(bug.x + 18, bug.y - 10, `BUG-${killsRef.current}`, "status: closed · verified");
     if (bugsRef.current.length === 0) window.setTimeout(spawn, 4000);
@@ -391,11 +397,31 @@ export function QaBug() {
       {ghosts.map((g) => (
         <span
           key={`ghost-${g.id}`}
-          className="bug-ghost absolute z-20 block"
+          className="bug-ghost absolute z-30 block"
           style={{ transform: `translate(${g.x - 8}px, ${g.y - 8}px) rotate(${g.angle}deg)` }}
         >
           {bugSvg}
         </span>
+      ))}
+
+      {splats.map((s) => (
+        <svg
+          key={`splat-${s.id}`}
+          className="bug-splat absolute z-2"
+          width={s.r * 4}
+          height={s.r * 4}
+          viewBox="-10 -10 20 20"
+          style={{ left: s.x - s.r * 2, top: s.y - s.r * 2 }}
+          aria-hidden="true"
+        >
+          {/* organic splat: central blob + small drops */}
+          <ellipse cx="0" cy="0" rx="5.5" ry="4" fill="var(--faint)" opacity="0.7" />
+          <circle cx="5" cy="-3" r="1.8" fill="var(--faint)" opacity="0.5" />
+          <circle cx="-5.5" cy="1.5" r="1.4" fill="var(--faint)" opacity="0.45" />
+          <circle cx="1" cy="5" r="1.2" fill="var(--faint)" opacity="0.4" />
+          <circle cx="-2" cy="-5" r="1" fill="var(--faint)" opacity="0.35" />
+          <circle cx="6.5" cy="2" r="0.9" fill="var(--faint)" opacity="0.3" />
+        </svg>
       ))}
 
       {reports.map((r) => (
