@@ -72,7 +72,43 @@ ${grid}
 <text x="92" y="640" font-family="${mono}" font-size="20" fill="${faint}" letter-spacing="2">PREDICTIVE TRAINING &#183; AI COACH &#183; PWA</text>
 </svg>`;
 
+// --- Finance AR/MR Application (internal, unreleased — abstract cover) ---
+// Floating mixed-reality panels in light perspective, one with a chart.
+const panel = (x, y, w, h, skew, content = "") => `
+<g transform="translate(${x},${y}) skewY(${skew})">
+  <rect width="${w}" height="${h}" rx="12" fill="#15181d" stroke="${line}" stroke-width="1.5" opacity="0.95"/>
+  ${content}
+</g>`;
+
+const chartInPanel = `
+<polyline points="30,120 80,95 130,105 180,70 230,78 280,45" fill="none" stroke="${muted}" stroke-width="2.5"/>
+<line x1="30" y1="150" x2="290" y2="150" stroke="${line}" stroke-width="1"/>
+<rect x="30" y="30" width="90" height="10" rx="5" fill="${line}"/>
+`;
+
+const rows = `
+<rect x="25" y="30" width="130" height="9" rx="4.5" fill="${line}"/>
+<rect x="25" y="55" width="90" height="9" rx="4.5" fill="${line}"/>
+<rect x="25" y="80" width="110" height="9" rx="4.5" fill="${line}"/>
+<circle cx="185" cy="35" r="7" fill="none" stroke="${faint}" stroke-width="1.5"/>
+<path d="M181 35l3 3 5 -6" fill="none" stroke="${faint}" stroke-width="1.5"/>
+`;
+
+const svg3 = `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">
+<rect width="1280" height="720" fill="${bg}"/>
+<ellipse cx="880" cy="640" rx="360" ry="26" fill="#15181d" opacity="0.6"/>
+${panel(560, 150, 320, 190, -3, chartInPanel)}
+${panel(930, 210, 220, 130, 4, rows)}
+${panel(700, 380, 250, 120, 2, `<rect x="25" y="28" width="120" height="9" rx="4.5" fill="${line}"/><rect x="25" y="52" width="160" height="9" rx="4.5" fill="${line}"/><rect x="25" y="76" width="80" height="9" rx="4.5" fill="${line}"/>`)}
+<circle cx="545" cy="145" r="3" fill="${faint}"/>
+<circle cx="1165" cy="205" r="3" fill="${faint}"/>
+<circle cx="960" cy="515" r="3" fill="${faint}"/>
+<text x="90" y="600" font-family="${sans}" font-size="44" font-weight="600" fill="${fg}">Finance AR/MR Application</text>
+<text x="92" y="640" font-family="${mono}" font-size="20" fill="${faint}" letter-spacing="2">INTERNAL PRODUCT &#183; MIXED REALITY</text>
+</svg>`;
+
 Promise.all([
   sharp(Buffer.from(svg1)).jpeg({ quality: 92 }).toFile(path.join(OUT, "match3-framework.jpg")),
   sharp(Buffer.from(svg2)).jpeg({ quality: 92 }).toFile(path.join(OUT, "fitness-ai.jpg")),
+  sharp(Buffer.from(svg3)).jpeg({ quality: 92 }).toFile(path.join(OUT, "finance-ar.jpg")),
 ]).then(() => console.log("covers written")).catch((e) => { console.error(e.message); process.exit(1); });

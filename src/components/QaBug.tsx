@@ -3,37 +3,50 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Beetles that live in the hero. They amble, get curious, and panic only
- * if the cursor rushes at them — approach slowly and you can catch one.
- * Clicking splats it and closes a ticket. A new one wanders in later,
- * and if left alone they multiply (up to three).
+ * Beetles that live in the hero. Per-frame simulation with a small state
+ * machine per bug:
  *
- * Movement is a per-frame simulation (not CSS transitions): each bug
- * always walks along the direction it is facing, turning gradually, so
- * there is no ice-skating or sideways dashing.
+ * - roam:     ambles with a breathing speed rhythm, prefers hanging around
+ *             the text (sometimes UNDER it, via z-index), pauses when idle.
+ * - flee:     genuine panic when the cursor rushes at it; fear lingers
+ *             after the threat stops. Approach slowly to catch one.
+ * - hide:     chased too long without being caught? It slips under the
+ *             portrait and the note reads "could not be reproduced".
+ * - playdead: very rarely plays dead... then "issue is still present".
+ * - stat:     very rarely sprints to the defects counter and adds one.
+ *
+ * They multiply every minute, up to five. Clicking one closes it with a
+ * quiet expanding ring. Counter starts at #1 and resets on refresh.
  */
+
+type Mode = "roam" | "flee" | "hide" | "hidden" | "playdead" | "stat";
 
 type BugState = {
   id: number;
   x: number;
   y: number;
-  heading: number; // radians, direction of travel
+  heading: number;
   speed: number;
   targetSpeed: number;
   tx: number;
   ty: number;
+  mode: Mode;
+  modeUntil: number;
   pauseUntil: number;
-  lastBother: number; // last time the cursor bothered it
-  phase: number; // personal rhythm offset
+  chaseMs: number;
+  lastBother: number;
+  phase: number;
+  under: boolean;
   el: HTMLButtonElement | null;
   inner: HTMLSpanElement | null;
 };
 
-type Splat = { id: number; x: number; y: number; n: number };
+type Note = { id: number; x: number; y: number; text: string; ring: boolean };
 
 let nextId = 1;
+let nextNoteId = 1;
 
-function makeBug(w: number, h: number): BugState {
+function makeBug(w: number, h: number, now: number): BugState {
   return {
     id: nextId++,
     x: 20 + Math.random() * Math.max(w - 40, 20),
@@ -43,9 +56,13 @@ function makeBug(w: number, h: number): BugState {
     targetSpeed: 20,
     tx: w / 2,
     ty: h / 2,
+    mode: "roam",
+    modeUntil: 0,
     pauseUntil: 0,
-    lastBother: performance.now(),
+    chaseMs: 0,
+    lastBother: now,
     phase: Math.random() * 10,
+    under: false,
     el: null,
     inner: null,
   };
@@ -56,27 +73,41 @@ export function QaBug() {
   const bugsRef = useRef<BugState[]>([]);
   const mouse = useRef({ x: -9999, y: -9999, vx: 0, vy: 0, t: 0 });
   const killsRef = useRef(0);
+  const statCooldown = useRef(0);
+  const hideCooldown = useRef(0);
 
   const [bugIds, setBugIds] = useState<number[]>([]);
-  const [splats, setSplats] = useState<Splat[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  const addNote = useCallback((x: number, y: number, text: string, ring = false) => {
+    const note: Note = { id: nextNoteId++, x, y, text, ring };
+    setNotes((n) => [...n, note]);
+    window.setTimeout(() => setNotes((n) => n.filter((v) => v.id !== note.id)), 2600);
+  }, []);
 
   const spawn = useCallback(() => {
     const area = areaRef.current;
     if (!area) return;
     const { width, height } = area.getBoundingClientRect();
-    const bug = makeBug(width, height);
+    const bug = makeBug(width, height, performance.now());
     bugsRef.current.push(bug);
     setBugIds((ids) => [...ids, bug.id]);
   }, []);
 
-  // Simulation loop.
+  // Rect of an element, in area coordinates. Used for the portrait
+  // hiding spot and the defects counter.
+  const rectOf = useCallback((selector: string) => {
+    const area = areaRef.current;
+    const el = document.querySelector(selector);
+    if (!area || !el) return null;
+    const a = area.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    return { x: r.left - a.left, y: r.top - a.top, w: r.width, h: r.height };
+  }, []);
+
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // One static bug, still clickable.
-      spawn();
-      return;
-    }
     spawn();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const onMouse = (e: MouseEvent) => {
       const area = areaRef.current;
@@ -86,7 +117,6 @@ export function QaBug() {
       const y = e.clientY - rect.top;
       const now = performance.now();
       const dt = Math.max(now - mouse.current.t, 8) / 1000;
-      // Smoothed cursor velocity, px/s.
       mouse.current.vx = mouse.current.vx * 0.7 + ((x - mouse.current.x) / dt) * 0.3;
       mouse.current.vy = mouse.current.vy * 0.7 + ((y - mouse.current.y) / dt) * 0.3;
       mouse.current.x = x;
@@ -95,10 +125,9 @@ export function QaBug() {
     };
     window.addEventListener("mousemove", onMouse, { passive: true });
 
-    // Bugs multiply if the colony survives long enough.
     const breeder = window.setInterval(() => {
-      if (bugsRef.current.length > 0 && bugsRef.current.length < 3) spawn();
-    }, 30000);
+      if (bugsRef.current.length > 0 && bugsRef.current.length < 5) spawn();
+    }, 60000);
 
     let raf = 0;
     let last = performance.now();
@@ -111,65 +140,161 @@ export function QaBug() {
       if (!area) return;
       const { width: w, height: h } = area.getBoundingClientRect();
       const m = mouse.current;
-      const stale = now - m.t > 120; // cursor idle → no velocity threat
-      const mSpeed = stale ? 0 : Math.hypot(m.vx, m.vy);
+      const stale = now - m.t > 120;
 
       for (const bug of bugsRef.current) {
         const dxm = bug.x - m.x;
         const dym = bug.y - m.y;
         const distM = Math.hypot(dxm, dym);
-        // Is the cursor heading toward the bug?
-        const closing = stale
-          ? 0
-          : (-(m.vx * dxm) - m.vy * dym) / Math.max(distM, 1);
+        const closing = stale ? 0 : (-(m.vx * dxm) - m.vy * dym) / Math.max(distM, 1);
 
-        if (distM < 170 && closing > 320) {
-          // Startled: sprint directly away from the cursor.
-          const away = Math.atan2(dym, dxm);
-          bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 200, 12), w - 12);
-          bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 200, 8), h - 8);
-          bug.targetSpeed = 240 + mSpeed * 0.1;
+        // A cursor rushing in causes real panic.
+        const threatened = distM < 200 && closing > 260;
+        if (threatened && bug.mode !== "hidden" && bug.mode !== "stat") {
+          bug.mode = "flee";
+          bug.modeUntil = now + 1100 + Math.random() * 700; // fear lingers
+          bug.lastBother = now;
           bug.pauseUntil = 0;
-          bug.lastBother = now;
-        } else if (distM < 100) {
-          // Uneasy: keeps moving, drifts away from slow-approaching cursors.
-          bug.lastBother = now;
-          if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 20) {
-            const away = Math.atan2(dym, dxm) + (Math.random() - 0.5);
-            bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 90, 12), w - 12);
-            bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 90, 8), h - 8);
+        }
+
+        if (bug.mode === "flee") {
+          bug.chaseMs += dt * 1000;
+          // Keep re-aiming directly away from the cursor while afraid.
+          const away = Math.atan2(dym, dxm) + (Math.random() - 0.5) * 0.4;
+          bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 240, 12), w - 12);
+          bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 240, 8), h - 8);
+          bug.targetSpeed = 300;
+          bug.under = false;
+          if (now > bug.modeUntil) {
+            // Chased for ages and never caught? Slip under the portrait.
+            const portrait = rectOf("[data-bug-hide]");
+            if (bug.chaseMs > 4500 && now > hideCooldown.current && portrait) {
+              hideCooldown.current = now + 25000;
+              bug.mode = "hide";
+              bug.tx = portrait.x + portrait.w / 2;
+              bug.ty = portrait.y + portrait.h / 2;
+              bug.targetSpeed = 260;
+            } else {
+              bug.mode = "roam";
+              bug.chaseMs = Math.max(0, bug.chaseMs - 1500);
+            }
           }
-          bug.targetSpeed = 55 + Math.random() * 30;
-        } else {
-          // Ambient life: speed breathes with a personal rhythm, and a bug
-          // ignored for a while settles into a lazy crawl.
-          const idle = (now - bug.lastBother) / 1000;
-          const base = idle > 12 ? 10 : 26;
-          const breathe = 0.65 + 0.5 * Math.sin(now / 1400 + bug.phase * 3);
-          if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) {
-            // Arrived: pause, then pick somewhere new.
-            bug.pauseUntil = now + 400 + Math.random() * (idle > 12 ? 3200 : 1600);
+        } else if (bug.mode === "hide") {
+          if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 10) {
+            bug.mode = "hidden";
+            bug.modeUntil = now + 3200 + Math.random() * 1500;
+            bug.under = true;
+            bug.targetSpeed = 0;
+            const portrait = rectOf("[data-bug-hide]");
+            if (portrait) {
+              addNote(
+                Math.max(8, Math.min(portrait.x, w - 230)),
+                portrait.y + portrait.h + 8,
+                "issue could not be reproduced",
+              );
+            }
+          }
+        } else if (bug.mode === "hidden") {
+          bug.targetSpeed = 0;
+          if (now > bug.modeUntil) {
+            bug.mode = "roam";
+            bug.chaseMs = 0;
+            bug.pauseUntil = 0;
             bug.tx = 12 + Math.random() * (w - 24);
             bug.ty = 8 + Math.random() * (h - 16);
           }
-          bug.targetSpeed = now < bug.pauseUntil ? 0 : base * breathe + 4;
+        } else if (bug.mode === "playdead") {
+          bug.targetSpeed = 0;
+          if (bug.inner)
+            bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg) scaleY(-0.9)`;
+          if (now > bug.modeUntil) {
+            bug.mode = "roam";
+            addNote(
+              Math.max(8, Math.min(bug.x + 20, w - 260)),
+              bug.y,
+              "issue is still present · reopening",
+            );
+            if (bug.inner)
+              bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
+          }
+        } else if (bug.mode === "stat") {
+          bug.under = false;
+          if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 10) {
+            window.dispatchEvent(new CustomEvent("qa-bug-defect"));
+            bug.mode = "roam";
+            bug.pauseUntil = now + 500;
+            bug.lastBother = now;
+            bug.chaseMs = 0;
+          }
+        } else {
+          // roam
+          const idle = (now - bug.lastBother) / 1000;
+          const uneasy = distM < 110;
+          if (uneasy) bug.lastBother = now;
+
+          if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) {
+            // Rare stunts, only when the cursor is far away.
+            const roll = Math.random();
+            const statRect = rectOf("#defect-stat");
+            if (!uneasy && roll < 0.012 && now > statCooldown.current && statRect) {
+              statCooldown.current = now + 90000;
+              bug.mode = "stat";
+              bug.tx = statRect.x + statRect.w / 2;
+              bug.ty = statRect.y + statRect.h / 2;
+              bug.targetSpeed = 150;
+              continue;
+            }
+            if (!uneasy && roll < 0.035) {
+              bug.mode = "playdead";
+              bug.modeUntil = now + 2400 + Math.random() * 1800;
+              continue;
+            }
+            // New destination: prefer the text side, where a dark bug is
+            // harder to spot; sometimes dive under the text layer.
+            bug.pauseUntil = now + 400 + Math.random() * (idle > 12 ? 3200 : 1600);
+            const textBias = Math.random() < 0.65;
+            bug.tx = textBias
+              ? 12 + Math.random() * (w * 0.55)
+              : 12 + Math.random() * (w - 24);
+            bug.ty = 8 + Math.random() * (h - 16);
+            bug.under = textBias && Math.random() < 0.5;
+          }
+          if (uneasy && now > bug.pauseUntil) {
+            // Drifts away from a slowly approaching cursor.
+            if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 20) {
+              const away = Math.atan2(dym, dxm) + (Math.random() - 0.5);
+              bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 90, 12), w - 12);
+              bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 90, 8), h - 8);
+            }
+            bug.targetSpeed = 60 + Math.random() * 25;
+          } else {
+            const base = idle > 12 ? 10 : 26;
+            const breathe = 0.65 + 0.5 * Math.sin(now / 1400 + bug.phase * 3);
+            bug.targetSpeed = now < bug.pauseUntil ? 0 : base * breathe + 4;
+          }
+          bug.chaseMs = Math.max(0, bug.chaseMs - dt * 400);
         }
 
-        // Ease speed toward target (acceleration), turn gradually, walk forward.
+        // Physics: accelerate, turn gradually, walk forward only.
         bug.speed += (bug.targetSpeed - bug.speed) * Math.min(dt * 4, 1);
-        const want = Math.atan2(bug.ty - bug.y, bug.tx - bug.x);
-        let turn = want - bug.heading;
-        while (turn > Math.PI) turn -= Math.PI * 2;
-        while (turn < -Math.PI) turn += Math.PI * 2;
-        const maxTurn = (bug.targetSpeed > 150 ? 9 : 3.4) * dt;
-        bug.heading += Math.max(-maxTurn, Math.min(maxTurn, turn));
-        bug.x += Math.cos(bug.heading) * bug.speed * dt;
-        bug.y += Math.sin(bug.heading) * bug.speed * dt;
-        bug.x = Math.min(Math.max(bug.x, 6), w - 6);
-        bug.y = Math.min(Math.max(bug.y, 4), h - 4);
+        if (bug.speed > 1) {
+          const want = Math.atan2(bug.ty - bug.y, bug.tx - bug.x);
+          let turn = want - bug.heading;
+          while (turn > Math.PI) turn -= Math.PI * 2;
+          while (turn < -Math.PI) turn += Math.PI * 2;
+          const maxTurn = (bug.mode === "flee" ? 10 : 3.4) * dt;
+          bug.heading += Math.max(-maxTurn, Math.min(maxTurn, turn));
+          bug.x += Math.cos(bug.heading) * bug.speed * dt;
+          bug.y += Math.sin(bug.heading) * bug.speed * dt;
+          bug.x = Math.min(Math.max(bug.x, 6), w - 6);
+          bug.y = Math.min(Math.max(bug.y, 4), h - 4);
+        }
 
-        if (bug.el) bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
-        if (bug.inner)
+        if (bug.el) {
+          bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
+          bug.el.style.zIndex = bug.under ? "1" : "20";
+        }
+        if (bug.inner && bug.mode !== "playdead")
           bug.inner.style.transform = `rotate(${(bug.heading * 180) / Math.PI + 90}deg)`;
       }
     };
@@ -180,7 +305,7 @@ export function QaBug() {
       clearInterval(breeder);
       window.removeEventListener("mousemove", onMouse);
     };
-  }, [spawn]);
+  }, [spawn, rectOf, addNote]);
 
   const kill = (id: number) => {
     const bug = bugsRef.current.find((b) => b.id === id);
@@ -188,13 +313,7 @@ export function QaBug() {
     bugsRef.current = bugsRef.current.filter((b) => b.id !== id);
     setBugIds((ids) => ids.filter((i) => i !== id));
     killsRef.current += 1;
-    const splat: Splat = { id: bug.id, x: bug.x, y: bug.y, n: killsRef.current };
-    setSplats((s) => [...s, splat]);
-    window.setTimeout(
-      () => setSplats((s) => s.filter((sp) => sp.id !== splat.id)),
-      2600,
-    );
-    // The colony never dies out completely.
+    addNote(bug.x + 16, bug.y - 6, `bug #${killsRef.current} · closed`, true);
     if (bugsRef.current.length === 0) window.setTimeout(spawn, 4000);
   };
 
@@ -202,7 +321,7 @@ export function QaBug() {
     <div
       ref={areaRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-10 hidden select-none md:block"
+      className="pointer-events-none absolute inset-0 select-none"
     >
       {bugIds.map((id) => (
         <button
@@ -222,7 +341,7 @@ export function QaBug() {
               const bug = bugsRef.current.find((b) => b.id === id);
               if (bug) bug.inner = el;
             }}
-            className="block"
+            className="block transition-transform duration-300"
           >
             <svg width="17" height="17" viewBox="0 0 20 20" fill="none" className="text-faint transition-colors hover:text-muted">
               <path d="M7 3.5L5.5 1.5M13 3.5l1.5-2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
@@ -235,22 +354,17 @@ export function QaBug() {
         </button>
       ))}
 
-      {splats.map((s) => (
-        <div key={`splat-${s.id}`} className="absolute" style={{ left: 0, top: 0, transform: `translate(${s.x - 10}px, ${s.y - 10}px)` }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="splat text-faint">
-            <path
-              d="M10 4l1.2 3.1L14 5.5l-1 3 3.2.6-2.6 1.9 2 2.4-3.1-.4.3 3.1-2.8-1.7-1.6 2.7-.9-3-3 .9 1.5-2.8L3 11l3-1.4-1.8-2.5 3.1.5L7 4.5l2 2z"
-              fill="currentColor"
-              opacity="0.7"
-            />
-          </svg>
-          <p
-            className="splat-label absolute left-6 top-0 whitespace-nowrap rounded bg-background/85 px-1.5 py-0.5 font-mono text-[12px] text-faint"
-            style={{
-              transform: s.x > 260 ? "translateX(calc(-100% - 40px))" : undefined,
-            }}
-          >
-            bug #{s.n} · closed
+      {notes.map((n) => (
+        <div
+          key={n.id}
+          className="absolute z-30"
+          style={{ left: 0, top: 0, transform: `translate(${n.x}px, ${n.y}px)` }}
+        >
+          {n.ring && (
+            <span className="bug-ring absolute -left-7 top-0 block h-5 w-5 rounded-full border border-faint" />
+          )}
+          <p className="splat-label whitespace-nowrap rounded bg-background/85 px-1.5 py-0.5 font-mono text-[12px] text-faint">
+            {n.text}
           </p>
         </div>
       ))}

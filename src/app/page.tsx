@@ -13,9 +13,11 @@ import { about } from "@/content/site";
 export default function Home() {
   return (
     <>
+      {/* Keyboard-only skip link: visible only while focused via Tab,
+          never after mouse clicks. */}
       <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2 focus:text-background"
+        href="#about"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[60] focus-visible:rounded-lg focus-visible:bg-foreground focus-visible:px-4 focus-visible:py-2 focus-visible:text-background"
       >
         Skip to content
       </a>

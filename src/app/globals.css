@@ -38,6 +38,16 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* Content is not selectable or copyable */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Images can't be dragged out or right-click-saved */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
 }
 
 ::selection {
@@ -96,28 +106,36 @@ body {
   }
 }
 
-/* Squash animation when a hero bug gets clicked */
-@keyframes splat-pop {
+/* Quiet expanding ring when a hero bug gets clicked */
+@keyframes bug-ring-expand {
   0% {
     transform: scale(0.3);
-    opacity: 1;
-  }
-  35% {
-    transform: scale(1.35);
-  }
-  55% {
-    transform: scale(1);
-  }
-  75% {
-    opacity: 1;
+    opacity: 0.8;
   }
   100% {
-    transform: scale(1);
+    transform: scale(1.9);
     opacity: 0;
   }
 }
-.splat {
-  animation: splat-pop 2.6s ease-out forwards;
+.bug-ring {
+  animation: bug-ring-expand 0.9s ease-out forwards;
+}
+
+/* Defects counter pop when a bug sneaks one in */
+@keyframes stat-pop-kf {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+    color: var(--foreground);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.stat-pop {
+  animation: stat-pop-kf 0.6s ease-out;
 }
 @keyframes splat-label-fade {
   0%,

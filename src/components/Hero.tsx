@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { identity, stats } from "@/content/site";
 import { QaBug } from "./QaBug";
+import { DefectCounter } from "./DefectCounter";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -12,17 +13,35 @@ const hasPortrait = fs.existsSync(
 
 export function Hero() {
   return (
-    <section id="top" className="pt-40 pb-20 md:pt-52 md:pb-24">
-      <div className="mx-auto w-full max-w-6xl px-6">
-        <div className="relative grid items-center gap-12 md:grid-cols-[1fr_auto]">
-          <QaBug />
-          <div>
-            <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
-              {identity.role} · {identity.location}
-            </p>
-            <h1 className="mt-4 text-[clamp(2.75rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
-              {identity.name}
-            </h1>
+    <section id="top" className="pt-32 pb-20 md:pt-52 md:pb-24">
+      {/* relative: the QaBug overlay roams this whole block, stats included.
+          Text and portrait sit at z-10 so bugs can dive under them (z-1)
+          or walk over them (z-20). */}
+      <div className="relative mx-auto w-full max-w-6xl px-6">
+        <QaBug />
+
+        <div className="grid items-center gap-10 md:grid-cols-[1fr_auto] md:gap-12">
+          <div className="relative z-10">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
+                  {identity.role} · {identity.location}
+                </p>
+                <h1 className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+                  {identity.name}
+                </h1>
+              </div>
+              {hasPortrait && (
+                <Image
+                  src={portraitPath}
+                  alt={`Portrait of ${identity.name}`}
+                  width={568}
+                  height={621}
+                  priority
+                  className="mt-1 h-16 w-16 shrink-0 rounded-full border border-line object-cover object-top grayscale md:hidden"
+                />
+              )}
+            </div>
             <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-muted">
               {identity.tagline}
             </p>
@@ -39,7 +58,10 @@ export function Hero() {
           </div>
 
           {hasPortrait && (
-            <div className="relative w-fit shrink-0 rounded-full p-1.5 ring-1 ring-line">
+            <div
+              data-bug-hide
+              className="relative z-10 hidden w-fit shrink-0 rounded-full bg-background p-1.5 ring-1 ring-line md:block"
+            >
               <Image
                 src={portraitPath}
                 alt={`Portrait of ${identity.name}`}
@@ -52,13 +74,19 @@ export function Hero() {
           )}
         </div>
 
-        <dl className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
+        <dl className="relative z-10 mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:mt-16 md:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col-reverse bg-surface px-6 py-6">
-              <dt className="mt-1 text-sm text-faint">{stat.label}</dt>
-              <dd className="text-3xl font-semibold tracking-tight text-foreground">
-                {stat.value}
+            <div key={stat.label} className="bg-surface px-6 py-6">
+              <dt className="sr-only">{stat.label}</dt>
+              <dd
+                id={stat.label === "defects reported" ? "defect-stat" : undefined}
+                className="text-3xl font-semibold tracking-tight text-foreground"
+              >
+                {stat.label === "defects reported" ? <DefectCounter /> : stat.value}
               </dd>
+              <p aria-hidden="true" className="mt-1 text-sm text-faint">
+                {stat.label}
+              </p>
             </div>
           ))}
         </dl>

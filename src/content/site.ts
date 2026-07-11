@@ -53,7 +53,7 @@ export const caseStudies: CaseStudy[] = [
       "Took over the department's technical hiring: running assessments, then training and mentoring the testers I helped bring in.",
     ],
     outcome:
-      "Manual QA effort dropped by about half per sprint, the defect pipeline is used by the whole studio, and the QA function now scales beyond one person. Coverage extends to other internal products, including a finance-focused VR application.",
+      "Manual QA effort dropped by about half per sprint, the defect pipeline is used by the whole studio, and the QA function now scales beyond one person. Coverage extends to other internal products, including a finance-focused AR/MR application.",
   },
   {
     number: "02",
@@ -100,7 +100,7 @@ export const caseStudies: CaseStudy[] = [
 ];
 
 export const earlierWork =
-  "Earlier: Quality Controller at Electronic Arts (contact person for the FIFA 20 demo, plus Madden NFL 20 and UFC 4). Other Ubisoft titles include Avatar: Frontiers of Pandora, Rainbow Six, Skull and Bones, The Crew Motorfest, and Heroes of Might and Magic III Remake.";
+  "Earlier: Quality Controller at Electronic Arts (contact person for the FIFA 20 demo, plus Madden NFL 20 and UFC 4). Other Ubisoft titles include Avatar: Frontiers of Pandora, Rainbow Six, Skull and Bones, and The Crew Motorfest.";
 
 export type Role = { title: string; period: string; note?: string };
 
@@ -175,8 +175,8 @@ export const expertise: ExpertiseCategory[] = [
   },
   {
     title: "People & Process",
-    body: "Technical recruitment, candidate assessments, mentoring testers through onboarding, and reporting standards adopted across teams. QA scales through people as much as through tools.",
-    tags: ["Technical recruitment", "Mentoring", "Agile", "Jira workflow design", "Stakeholder reporting"],
+    body: "My entire career has run on Agile: sprint planning, dailies, retros, and QA embedded in the Scrum cadence rather than bolted on at the end. Plus technical recruitment, candidate assessments, mentoring testers through onboarding, and reporting standards adopted across teams.",
+    tags: ["Agile", "Scrum", "Technical recruitment", "Mentoring", "Jira workflow design", "Stakeholder reporting"],
   },
   {
     title: "AI-Assisted Workflows",
@@ -234,14 +234,13 @@ export const gallery: GalleryItem[] = [
   { slug: "rainbow-six", name: "Rainbow Six", studio: "Ubisoft", detail: "Tactical shooter · PlayStation, Xbox, PC" },
   { slug: "skull-and-bones", name: "Skull and Bones", studio: "Ubisoft", detail: "Naval action · PS5, Xbox Series, PC" },
   { slug: "crew-motorfest", name: "The Crew Motorfest", studio: "Ubisoft", detail: "Open-world racing · PlayStation, Xbox, PC" },
-  { slug: "homm3-remake", name: "Heroes of Might and Magic III Remake", studio: "Ubisoft", detail: "Strategy · PC" },
   { slug: "fifa-20", name: "FIFA 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "madden-20", name: "Madden NFL 20", studio: "Electronic Arts", detail: "Sports · PlayStation, Xbox, PC" },
   { slug: "ufc-4", name: "UFC 4", studio: "Electronic Arts", detail: "Fighting · PlayStation, Xbox" },
-  { slug: "sugar-madness", name: "Sugar Madness", studio: "Avantaj Play", detail: "Casual game · Mobile, Browser" },
+  { slug: "sugar-madness", name: "Sugar Madness", studio: "Avantaj Play", detail: "Casual game · VR, Browser" },
   { slug: "jolly-match-3", name: "Jolly Match 3", studio: "Avantaj Play", detail: "Puzzle · Mobile" },
-  { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · Mobile AR" },
-  { slug: "vr-finance", name: "VR Finance Application", studio: "Avantaj Play", detail: "Finance tool · VR" },
+  { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · Mobile, VR/AR" },
+  { slug: "finance-ar", name: "Finance AR/MR Application", studio: "Avantaj Play", detail: "Finance tool · AR/MR, internal product" },
   { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal project", detail: "Test automation · Mobile games" },
   { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile" },
 ];

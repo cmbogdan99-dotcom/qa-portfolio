@@ -26,7 +26,15 @@ export function Nav() {
         className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6"
       >
         <Link
-          href="/#top"
+          href="/"
+          onClick={(e) => {
+            // Same-page: scroll to top ourselves; a hash link won't
+            // re-trigger once the hash is already set.
+            if (pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
           aria-label="Home"
           className="-ml-2 flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-faint"
         >

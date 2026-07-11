@@ -96,7 +96,7 @@ export default function ProjectsPage() {
                                 fill
                                 quality={90}
                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                                className="object-contain grayscale transition-all duration-500 ease-out group-hover:[transform:translateZ(70px)] group-hover:[filter:grayscale(0)_drop-shadow(0_18px_28px_rgba(0,0,0,0.7))]"
+                                className="rounded-t-2xl object-contain grayscale transition-all duration-500 ease-out group-hover:[transform:translateZ(70px)] group-hover:[filter:grayscale(0)_drop-shadow(0_18px_28px_rgba(0,0,0,0.7))]"
                               />
                             </>
                           ) : (
