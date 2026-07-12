@@ -12,7 +12,7 @@ export function PortraitDrag({ src, alt }: { src: string; alt: string }) {
   const dragging = useRef(false);
   const startCx = useRef(0);
   const startOff = useRef(0);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const revealed = offsetX > 24;
 
