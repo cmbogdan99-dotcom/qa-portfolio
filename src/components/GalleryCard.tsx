@@ -57,7 +57,7 @@ export function GalleryCard({ item, img }: Props) {
         </div>
       )}
 
-      <article className="group rounded-2xl border border-line bg-surface transition duration-300 hover:z-20 hover:-translate-y-1 hover:border-faint hover:shadow-[0_24px_48px_-16px_rgba(0,0,0,0.7)]">
+      <article className="group rounded-2xl border border-line bg-surface transition duration-300 hover:z-20 hover:-translate-y-1 hover:border-faint hover:shadow-[0_12px_28px_-8px_rgba(0,0,0,0.5)]">
         <div className="relative aspect-[16/9] [perspective:700px]">
           {img ? (
             <>
@@ -78,7 +78,7 @@ export function GalleryCard({ item, img }: Props) {
                 fill
                 quality={90}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className="rounded-t-2xl object-contain grayscale transition-all duration-500 ease-out group-hover:[transform:translateZ(70px)] group-hover:[filter:grayscale(0)_drop-shadow(0_18px_28px_rgba(0,0,0,0.7))]"
+                className="rounded-t-2xl object-contain grayscale transition-all duration-500 ease-out group-hover:[transform:translateZ(70px)] group-hover:[filter:grayscale(0)_drop-shadow(0_8px_14px_rgba(0,0,0,0.45))]"
               />
             </>
           ) : (
@@ -90,7 +90,7 @@ export function GalleryCard({ item, img }: Props) {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-line p-5">
+        <div className="flex min-h-[72px] items-center justify-between gap-3 border-t border-line p-5">
           <div>
             <h3 className="text-[15px] font-medium tracking-tight text-foreground">
               {item.name}
@@ -110,7 +110,7 @@ export function GalleryCard({ item, img }: Props) {
                 rel="noopener noreferrer"
                 className="rounded-lg border border-line px-3 py-1.5 text-[13px] text-muted transition-colors hover:border-faint hover:text-foreground"
               >
-                Visit ↗
+                {item.hrefLabel ?? "Visit"} ↗
               </a>
             )}
           </div>

@@ -38,7 +38,7 @@ function imageFor(slug: string): string | null {
   return match ? `/projects/${match}` : null;
 }
 
-const studios = ["Ubisoft", "Electronic Arts", "Avantaj Play", "Personal project"];
+const studios = ["Personal projects", "Ubisoft", "Electronic Arts", "Avantaj Play"];
 
 export default function ProjectsPage() {
   return (

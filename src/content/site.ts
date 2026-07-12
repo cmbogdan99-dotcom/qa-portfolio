@@ -228,8 +228,10 @@ export type GalleryItem = {
   name: string;
   studio: string;
   detail: string;
-  /** Optional live link, shown as a "Visit" action on the card. */
+  /** Optional live link, shown as an action on the card. */
   href?: string;
+  /** Label for the href button. Defaults to "Visit" if omitted. */
+  hrefLabel?: string;
   /** DLC / expansion sub-cards shown on hover. */
   dlc?: DlcItem[];
 };
@@ -276,9 +278,9 @@ export const gallery: GalleryItem[] = [
   { slug: "jolly-match-3", name: "Jolly Match 3", studio: "Avantaj Play", detail: "Puzzle · Mobile" },
   { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · VR/AR" },
   { slug: "finance-ar", name: "Finance AR/MR Application", studio: "Avantaj Play", detail: "Finance tool · AR/MR, internal product" },
-  { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal project", detail: "Test automation · Mobile games" },
-  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile", href: "https://cmbogdan99-dotcom.github.io/dltate/" },
-  { slug: "qa-automation-portfolio", name: "QA Automation Portfolio", studio: "Personal project", detail: "Playwright · TypeScript · GitHub Actions · API testing", href: "https://github.com/cmbogdan99-dotcom/qa-automation-portfolio" },
+  { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal projects", detail: "Test automation · Mobile games" },
+  { slug: "fitness-ai", name: "Fitness AI", studio: "Personal projects", detail: "Fitness app · Web, Mobile", href: "https://cmbogdan99-dotcom.github.io/dltate/", hrefLabel: "Open app" },
+  { slug: "qa-automation-portfolio", name: "QA Automation Portfolio", studio: "Personal projects", detail: "Playwright · TypeScript · CI/CD", href: "https://github.com/cmbogdan99-dotcom/qa-automation-portfolio", hrefLabel: "View on GitHub" },
 ];
 
 export const philosophyLine =
