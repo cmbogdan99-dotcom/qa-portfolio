@@ -27,18 +27,12 @@ export function Contact() {
             download the CV.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <a
-              href={`mailto:${links.email}`}
-              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
-            >
-              Email
-            </a>
             <button
               type="button"
               onClick={copyEmail}
               className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
             >
-              {copied ? "Copied!" : "Copy email"}
+              {copied ? "Copied!" : links.email}
             </button>
             <a
               href={links.linkedin}
