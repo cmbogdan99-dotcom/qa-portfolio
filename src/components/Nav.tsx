@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,15 +18,23 @@ export function Nav() {
   const [progress, setProgress] = useState(0);
   const pathname = usePathname();
 
-  useEffect(() => {
-    const update = () => {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(scrollable > 0 ? window.scrollY / scrollable : 0);
-    };
-    window.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", update);
+  const updateProgress = useCallback(() => {
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    setProgress(scrollable > 0 ? window.scrollY / scrollable : 0);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress, { passive: true });
+    updateProgress();
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+    };
+  }, [updateProgress]);
+
+  // Recalculate when mobile menu opens/closes (changes document height)
+  useEffect(() => { updateProgress(); }, [open, updateProgress]);
 
   const isActive = (href: string) => href === "/projects" && pathname === "/projects";
 
