@@ -278,6 +278,7 @@ export const gallery: GalleryItem[] = [
   { slug: "finance-ar", name: "Finance AR/MR Application", studio: "Avantaj Play", detail: "Finance tool · AR/MR, internal product" },
   { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal project", detail: "Test automation · Mobile games" },
   { slug: "fitness-ai", name: "Fitness AI", studio: "Personal project", detail: "Fitness app · Web, Mobile", href: "https://cmbogdan99-dotcom.github.io/dltate/" },
+  { slug: "qa-automation-portfolio", name: "QA Automation Portfolio", studio: "Personal project", detail: "Playwright · TypeScript · GitHub Actions · API testing", href: "https://github.com/cmbogdan99-dotcom/qa-automation-portfolio" },
 ];
 
 export const philosophyLine =
