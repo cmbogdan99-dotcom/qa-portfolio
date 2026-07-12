@@ -281,6 +281,6 @@ export const philosophyLine =
 
 export const availability = {
   open: true,
-  // Edit these roles to match what you're currently looking for.
-  roles: ["Senior QA Engineer", "QA Automation Engineer", "QA Lead"],
+  // Edit this label to match what you're currently open to.
+  label: "Open to new QA roles",
 };

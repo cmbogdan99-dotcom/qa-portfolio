@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { identity, stats, availability } from "@/content/site";
 import { QaBug } from "./QaBug";
+import { ThemeDot } from "./ThemeDot";
 import { DefectCounter } from "./DefectCounter";
 import { CountUp } from "./CountUp";
+import { PortraitDrag } from "./PortraitDrag";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -26,16 +28,25 @@ export function Hero() {
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
-                  {identity.role} · {identity.location}
+                  {identity.role} <ThemeDot /> {identity.location}
                 </p>
-                <h1 className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+                <h1 data-secret-name className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
                   {identity.name}
                 </h1>
                 {availability.open && (
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-800/40 bg-emerald-950/30 px-3 py-1 [data-theme='light']:border-emerald-300/60 [data-theme='light']:bg-emerald-50">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-emerald-400/80">
-                      {availability.roles.join(" · ")}
+                  <div
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1"
+                    style={{ borderColor: "var(--avail-border)", background: "var(--avail-bg)" }}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 animate-pulse rounded-full"
+                      style={{ background: "var(--avail-dot)" }}
+                    />
+                    <span
+                      className="font-mono text-[11px] uppercase tracking-[0.12em]"
+                      style={{ color: "var(--avail-text)" }}
+                    >
+                      {availability.label}
                     </span>
                   </div>
                 )}
@@ -67,19 +78,10 @@ export function Hero() {
           </div>
 
           {hasPortrait && (
-            <div
-              data-bug-hide
-              className="relative z-10 hidden w-fit shrink-0 rounded-full bg-background p-1.5 ring-1 ring-line md:block"
-            >
-              <Image
-                src={portraitPath}
-                alt={`Portrait of ${identity.name}`}
-                width={568}
-                height={621}
-                priority
-                className="h-48 w-48 rounded-full object-cover object-top grayscale md:h-64 md:w-64"
-              />
-            </div>
+            <PortraitDrag
+              src={portraitPath}
+              alt={`Portrait of ${identity.name}`}
+            />
           )}
         </div>
 

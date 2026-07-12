@@ -191,14 +191,92 @@ img {
   }
 }
 
-/* Konami: all bugs do a quick spin */
-@keyframes konami-spin-kf {
-  0%   { transform: scale(1) rotate(0deg); }
-  30%  { transform: scale(1.4) rotate(180deg); }
-  100% { transform: scale(1) rotate(360deg); }
+/* Bug sleep: floating z above idle bugs */
+.bug-zzz {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: var(--font-mono), monospace;
+  color: var(--faint);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1;
 }
-.konami-spin {
-  animation: konami-spin-kf 0.9s ease-in-out forwards !important;
+.bug-sleeping .bug-zzz {
+  animation: zzz-rise 1.8s ease-in-out infinite;
+}
+@keyframes zzz-rise {
+  0%   { opacity: 0;   transform: translateX(-50%) translateY(4px) scale(0.5); }
+  20%  { opacity: 1;   transform: translateX(-50%) translateY(0px) scale(1); }
+  80%  { opacity: 0.6; transform: translateX(-50%) translateY(-10px) scale(0.85); }
+  100% { opacity: 0;   transform: translateX(-50%) translateY(-18px) scale(0.6); }
+}
+
+/* Bug seeking stat: subtle glow to draw attention */
+.bug-seeking {
+  filter: drop-shadow(0 0 5px var(--foreground)) !important;
+}
+
+/* Defect counter pulse when a bug is en route */
+@keyframes stat-hunting-kf {
+  0%, 100% { color: var(--foreground); }
+  30%      { color: var(--muted); transform: scale(1.08); }
+  60%      { color: var(--foreground); transform: scale(1.04); }
+}
+.stat-hunting {
+  display: inline-block;
+  animation: stat-hunting-kf 0.7s ease-in-out 3;
+}
+
+/* Availability badge: adapts to theme */
+:root {
+  --avail-dot: #34d399;
+  --avail-text: rgb(52 211 153 / 0.75);
+  --avail-border: rgb(6 78 59 / 0.4);
+  --avail-bg: rgb(6 78 59 / 0.25);
+}
+[data-theme="light"] {
+  --avail-dot: #059669;
+  --avail-text: #065f46;
+  --avail-border: rgb(5 150 105 / 0.35);
+  --avail-bg: rgb(236 253 245 / 0.8);
+}
+
+/* Skill tag glitch on hover */
+@keyframes tag-glitch {
+  0%   { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  10%  { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 1px); }
+  20%  { clip-path: inset(50% 0 30% 0); transform: translate(2px, -1px); }
+  30%  { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 2px); }
+  40%  { clip-path: inset(70% 0 10% 0); transform: translate(1px, -2px); }
+  50%  { clip-path: inset(0 0 0 0);     transform: translate(0); }
+  100% { clip-path: inset(0 0 0 0);     transform: translate(0); }
+}
+.skill-tag {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skill-tag::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: var(--foreground);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .skill-tag:hover::after {
+    animation: tag-glitch 0.35s steps(1) forwards;
+    opacity: 1;
+  }
+  .skill-tag:hover {
+    color: var(--foreground);
+    transition: color 0.1s;
+  }
 }
 
 /* Styled native accordion */

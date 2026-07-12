@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [mounted, setMounted] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -21,20 +22,27 @@ export function ThemeToggle() {
     setTimeout(() => document.documentElement.classList.remove("theme-transition"), 350);
   };
 
-  // Avoid hydration mismatch — render nothing on the server.
-  if (!mounted) return <span className="w-14" aria-hidden="true" />;
+  if (!mounted) return null;
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      className="select-none rounded px-1.5 py-1 font-mono text-[11px] tracking-wide text-faint transition-colors hover:text-muted"
-    >
-      <span className="opacity-40">&lt;</span>
-      {theme}
-      <span className="opacity-40"> /&gt;</span>
-    </button>
+    <div className="fixed bottom-6 left-6 z-40">
+      <button
+        type="button"
+        onClick={toggle}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        className="flex items-center gap-1 font-mono text-[11px] text-faint/60 transition-colors hover:text-faint"
+      >
+        <span className="text-faint/30">$</span>
+        <span>theme --{theme}</span>
+        <span
+          className="ml-0.5 inline-block w-[7px] overflow-hidden transition-all duration-100"
+          style={{ opacity: hovered ? 1 : 0 }}
+        >
+          ▌
+        </span>
+      </button>
+    </div>
   );
 }

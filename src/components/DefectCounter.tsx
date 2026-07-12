@@ -35,8 +35,20 @@ export function DefectCounter() {
 
   useEffect(() => {
     const onDefect = () => setExtra((e) => e + 1);
+    const onHunting = () => {
+      const el = spanRef.current;
+      if (!el) return;
+      el.classList.remove("stat-hunting");
+      void el.offsetWidth;
+      el.classList.add("stat-hunting");
+      setTimeout(() => el.classList.remove("stat-hunting"), 2200);
+    };
     window.addEventListener("qa-bug-defect", onDefect);
-    return () => window.removeEventListener("qa-bug-defect", onDefect);
+    window.addEventListener("qa-bug-hunting", onHunting);
+    return () => {
+      window.removeEventListener("qa-bug-defect", onDefect);
+      window.removeEventListener("qa-bug-hunting", onHunting);
+    };
   }, []);
 
   const count = display + extra;

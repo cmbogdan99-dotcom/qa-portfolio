@@ -1,14 +1,23 @@
+"use client";
+
+import { useState } from "react";
 import { identity, links, philosophyLine } from "@/content/site";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
 
-const contactLinks = [
-  { label: "Email", href: `mailto:${links.email}`, external: false },
-  { label: "LinkedIn", href: links.linkedin, external: true },
-  { label: "GitHub", href: links.github, external: true },
-];
-
 export function Contact() {
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(links.email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable — fallback: do nothing
+    }
+  };
+
   return (
     <>
       <Section id="contact" label="Contact" title="Get in touch">
@@ -18,18 +27,35 @@ export function Contact() {
             download the CV.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            {contactLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                {...(link.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-                className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
-              >
-                {link.label}
-              </a>
-            ))}
+            <a
+              href={`mailto:${links.email}`}
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
+            >
+              Email
+            </a>
+            <button
+              type="button"
+              onClick={copyEmail}
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
+            >
+              {copied ? "Copied!" : "Copy email"}
+            </button>
+            <a
+              href={links.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
+            >
+              LinkedIn
+            </a>
+            <a
+              href={links.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
+            >
+              GitHub
+            </a>
             <a
               href={links.cv}
               download

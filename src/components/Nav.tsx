@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "./ThemeToggle";
 
 const items = [
   { href: "/#about", label: "About" },
@@ -16,12 +15,29 @@ const items = [
 
 export function Nav() {
   const [open, setOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const update = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(scrollable > 0 ? window.scrollY / scrollable : 0);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   const isActive = (href: string) => href === "/projects" && pathname === "/projects";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-background/80 backdrop-blur-md">
+      {/* Scroll progress bar */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-foreground/30"
+        style={{ transform: `scaleX(${progress})` }}
+      />
       <nav
         aria-label="Main"
         className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6"
@@ -47,7 +63,6 @@ export function Nav() {
           </svg>
         </Link>
 
-        {/* Desktop nav */}
         <ul className="hidden items-center gap-7 md:flex">
           {items.map((item) => (
             <li key={item.href}>
@@ -62,31 +77,24 @@ export function Nav() {
               </Link>
             </li>
           ))}
-          <li>
-            <ThemeToggle />
-          </li>
         </ul>
 
-        {/* Mobile: theme toggle + hamburger */}
-        <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle />
-          <button
-            type="button"
-            className="-mr-2 flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground"
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              {open ? (
-                <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" />
-              ) : (
-                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" />
-              )}
-            </svg>
-          </button>
-        </div>
+        <button
+          type="button"
+          className="-mr-2 flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground md:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            {open ? (
+              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" />
+            ) : (
+              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" />
+            )}
+          </svg>
+        </button>
       </nav>
 
       {open && (

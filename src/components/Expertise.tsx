@@ -27,7 +27,7 @@ export function Expertise() {
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
                   {cat.tags.map((tag) => (
-                    <li key={tag} className="font-mono text-[12px] text-faint">
+                    <li key={tag} className="skill-tag font-mono text-[12px] text-faint" data-text={tag}>
                       {tag}
                     </li>
                   ))}
