@@ -6,7 +6,7 @@ export const identity = {
   role: "Senior QA Engineer",
   location: "Bucharest, Romania",
   tagline:
-    "I own quality end to end: test strategy, release readiness, and the processes behind them. Five years across PC, console, mobile, browser, and VR. Currently building deep expertise in test automation.",
+    "I own quality end to end: test strategy, release readiness, and the processes behind them. Five years across PC, console, mobile, browser, and VR. Actively growing into automation: Playwright, TypeScript, and CI/CD on personal projects, looking to apply it professionally.",
   platforms: ["PC", "PlayStation", "Xbox", "Stadia", "Mobile", "Browser", "VR"],
 };
 
@@ -27,7 +27,7 @@ export const links = {
 export const about: string[] = [
   "Quality work starts before the first test case. Most defects that matter trace back to unclear requirements, untested assumptions, or risks nobody named early enough. That is where I spend my attention first. Test execution is the visible part of QA; the useful part is deciding what could fail, what that would cost, and what to check first.",
   "I have spent over five years testing large, complex software: AAA productions at Ubisoft and EA, and now a multi-platform product where I am the only QA. Every quality decision, from planning to release sign-off, goes through me. Different industries share the same fundamentals: scope pressure, platform fragmentation, release risk, and the need for someone to say clearly what \"ready\" means.",
-  "Right now I am investing in automation with C#, Python, Unity Test Framework, AltTester, and CI/CD. Not to replace judgment with scripts, but to remove the repetitive work that keeps testers away from the problems that need thinking.",
+  "Right now I am investing in automation: C#, Python, Unity Test Framework, and AltTester in production use, and building Playwright and TypeScript skills through personal projects. Not to replace judgment with scripts, but to remove the repetitive work that keeps testers away from the problems that need thinking.",
 ];
 
 export type CaseStudy = {
@@ -78,7 +78,9 @@ export const caseStudies: CaseStudy[] = [
       "Manual test scripting for match-3 games does not scale: every new level means hours of case-by-case setup, and content updates quietly invalidate old coverage.",
     approach: [
       "Built a single reusable framework, with AI-assisted development in Claude Code, that runs automated suites for level validation, game-logic checks, and functional coverage across performance, visual, audio, event, notification, and monetization systems.",
+      "Simulated multiple player personas through configurable alter-ego profiles (distinct playstyle presets) across parallel multi-device sessions, validating personality-driven mechanics and progression loops.",
       "Designed it to adapt to new levels and content updates instead of being rewritten for them.",
+      "Building Playwright and TypeScript skills through a personal portfolio project: UI end-to-end tests, API testing, Page Object Model, fixtures, and GitHub Actions CI, to develop capability I want to bring to a team.",
     ],
     outcome:
       "New-level test setup time went from hours to minutes, and the framework keeps working as content changes.",
@@ -170,8 +172,8 @@ export const expertise: ExpertiseCategory[] = [
   },
   {
     title: "Automation & Tooling",
-    body: "A working automation foundation: C#, Python, Unity Test Framework, and AltTester in production use today. Currently building depth in Playwright and Postman, plus CI/CD pipelines.",
-    tags: ["C#", "Python", "Unity Test Framework", "AltTester", "Playwright", "Postman", "Jenkins", "Git"],
+    body: "Building Playwright and TypeScript skills through personal projects: end-to-end tests, API testing, Page Object Model, and GitHub Actions CI, looking to apply them professionally. Production automation in C#, Python, Unity Test Framework, and AltTester.",
+    tags: ["Playwright", "TypeScript", "GitHub Actions", "Git", "Postman", "Jenkins", "C#", "Python", "Unity Test Framework", "AltTester"],
   },
   {
     title: "People & Process",
@@ -181,7 +183,7 @@ export const expertise: ExpertiseCategory[] = [
   {
     title: "AI-Assisted Workflows",
     body: "AI tools as accelerators for test design, documentation, automation scaffolding, and prototyping. Human judgment stays in charge of what ships.",
-    tags: ["Claude", "Claude Code", "Gemini", "Copilot", "Cursor", "Rovo AI"],
+    tags: ["Claude", "Claude Code", "Gemini", "ChatGPT", "Copilot", "Cursor", "Rovo AI"],
   },
 ];
 

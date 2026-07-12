@@ -152,9 +152,9 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
   }, [visibleRectOf]);
 
   useEffect(() => {
-    // First bug spawns after 60s — gives the page time to breathe
-    const firstSpawn = window.setTimeout(spawn, 60000);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // First bug spawns after 30s
+    const firstSpawn = window.setTimeout(spawn, 30000);
 
     const io = new IntersectionObserver(
       ([entry]) => { activeRef.current = entry.isIntersecting; },
@@ -233,9 +233,11 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
 
           if (bug.mode === "flee") {
             bug.chaseMs += dt * 1000;
-            const away = Math.atan2(dym, dxm) + (Math.random() - 0.5) * 0.4;
-            bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 200, 12), w - 12);
-            bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 200, 8), h - 8);
+            const baseAngle = Math.atan2(dym, dxm);
+            const bias = (bug.id % 7 - 3) * 0.22;
+            const away = baseAngle + bias + (Math.random() - 0.5) * 0.25;
+            bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 220, 12), w - 12);
+            bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 220, 8), h - 8);
             bug.targetSpeed = 120;
             if (now > bug.modeUntil) {
               const portrait = visibleRectOf("[data-bug-hide]");
@@ -330,9 +332,10 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
             }
             if (uneasy && now > bug.pauseUntil) {
               if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 20) {
-                const away = Math.atan2(dym, dxm) + (Math.random() - 0.5);
-                bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 90, 12), w - 12);
-                bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 90, 8), h - 8);
+                const bias = (bug.id % 7 - 3) * 0.22;
+                const away = Math.atan2(dym, dxm) + bias + (Math.random() - 0.5) * 0.3;
+                bug.tx = Math.min(Math.max(bug.x + Math.cos(away) * 95, 12), w - 12);
+                bug.ty = Math.min(Math.max(bug.y + Math.sin(away) * 95, 8), h - 8);
               }
               bug.targetSpeed = 55 + Math.random() * 20;
             } else {
