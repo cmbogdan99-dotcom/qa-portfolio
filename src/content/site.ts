@@ -7,7 +7,7 @@ export const identity = {
   location: "Bucharest, Romania",
   tagline:
     "I own quality end to end: test strategy, release readiness, and the processes behind them. Five years across PC, console, mobile, browser, and VR. Actively growing into automation: Playwright, TypeScript, and CI/CD on personal projects, looking to apply it professionally.",
-  platforms: ["Mobile", "Browser", "VR", "PC", "PlayStation", "Xbox"],
+  platforms: ["Mobile", "Browser", "VR", "PC", "Gaming Consoles"],
 };
 
 export const stats = [

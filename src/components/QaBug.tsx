@@ -155,10 +155,12 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     const area = areaRef.current;
     if (!area) return;
     const { width: w, height: h } = area.getBoundingClientRect();
-    const portrait = visibleRectOf("[data-bug-hide]");
+    // Use the moving element's visual rect (accounts for CSS transform)
+    const portrait = visibleRectOf("[data-portrait-moving]");
     if (!portrait) { spawn(); return; }
     const now = performance.now();
-    const sx = portrait.x + portrait.w * 0.6;
+    // Start near right-center of the moving image — hidden until portrait slides left past this point
+    const sx = portrait.x + portrait.w * 0.65;
     const sy = portrait.y + portrait.h * 0.55;
     const bug = makeBug(w, h, now, sx, sy);
     bug.entering = false;
@@ -166,7 +168,7 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     bug.y = sy;
     bug.speed = 6;
     bug.targetSpeed = 45;
-    bug.tx = Math.max(12, portrait.x - 20 - Math.random() * 40);
+    bug.tx = Math.max(12, portrait.x - 30 - Math.random() * 50);
     bug.ty = portrait.y + portrait.h * (0.3 + Math.random() * 0.4);
     bugsRef.current.push(bug);
     setBugIds((ids) => [...ids, bug.id]);
@@ -405,10 +407,10 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
 
-          // While a bug is physically inside the portrait rect it should be
-          // invisible (z below portrait, opacity 0) so it appears to emerge
-          // from underneath as it crawls out.
-          const pr = visibleRectOf("[data-bug-hide]");
+          // While inside the MOVING portrait image rect the bug is invisible —
+          // getBoundingClientRect on [data-portrait-moving] returns the visual
+          // (post-transform) position, so this stays accurate as user drags.
+          const pr = visibleRectOf("[data-portrait-moving]");
           const underPortrait = !!pr &&
             bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
             bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;

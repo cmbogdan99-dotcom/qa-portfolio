@@ -72,6 +72,7 @@ export function PortraitDrag({ src, alt }: { src: string; alt: string }) {
 
       {/* Portrait — draggable, slides left to reveal CV button */}
       <div
+        data-portrait-moving
         className="relative w-fit shrink-0 cursor-grab rounded-full bg-background p-1.5 ring-1 ring-line active:cursor-grabbing"
         style={{
           transform: `translateX(-${offsetX}px)`,
