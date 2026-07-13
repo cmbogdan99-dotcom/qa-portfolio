@@ -26,10 +26,10 @@ export function Hero() {
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
+                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-accent/80">
                   {identity.role} <ThemeDot /> {identity.location}
                 </p>
-                <h1 data-secret-name className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+                <h1 data-secret-name className="mt-4 font-display text-[clamp(2.6rem,6.5vw,4rem)] font-normal leading-[1.02] tracking-[-0.01em] text-foreground" style={{ textWrap: "balance" }}>
                   {identity.name}
                 </h1>
                 {availability.open && (

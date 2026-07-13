@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { identity } from "@/content/site";
 import { BackToTop } from "@/components/BackToTop";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
 import { Secrets } from "@/components/Secrets";
+import { LenisProvider } from "@/components/LenisProvider";
+import { CursorDot } from "@/components/CursorDot";
+import { GrainOverlay } from "@/components/GrainOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,6 +17,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 const siteUrl = "https://bogdan-carcadea.ro";
@@ -45,7 +55,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <head>
         {/* Apply saved theme before first paint to avoid flash */}
@@ -56,6 +66,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <LenisProvider />
+        <CursorDot />
+        <GrainOverlay />
         {children}
         <BackToTop />
         <ConsoleEgg />
