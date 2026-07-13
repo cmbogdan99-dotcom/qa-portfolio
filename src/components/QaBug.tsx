@@ -21,6 +21,7 @@ type BugState = {
   lastBother: number;
   phase: number;
   entering: boolean;
+  emerged: boolean; // true once bug has exited portrait bounds for first time
   el: HTMLButtonElement | null;
   inner: HTMLSpanElement | null;
 };
@@ -50,7 +51,6 @@ function makeBug(w: number, h: number, now: number, sx: number, sy: number): Bug
     heading: Math.random() * Math.PI * 2,
     speed: 0,
     targetSpeed: 70,
-    // First target: left 60% of area, avoiding edges
     tx: 24 + Math.random() * Math.max(w * 0.58 - 48, 20),
     ty: 20 + Math.random() * Math.max(h - 40, 20),
     mode: "roam",
@@ -61,6 +61,7 @@ function makeBug(w: number, h: number, now: number, sx: number, sy: number): Bug
     lastBother: now,
     phase: Math.random() * 10,
     entering: true,
+    emerged: true, // normal bugs are immediately visible; portrait bugs set this to false
     el: null,
     inner: null,
   };
@@ -164,6 +165,7 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     const sy = portrait.y + portrait.h * 0.55;
     const bug = makeBug(w, h, now, sx, sy);
     bug.entering = false;
+    bug.emerged = false; // hidden until it crawls out from under portrait
     bug.x = sx;
     bug.y = sy;
     bug.speed = 6;
@@ -260,7 +262,7 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
           const threatened =
             !stale &&
             distM < 130 &&
-            (closing > (sleepingNow ? 420 : 260) || (!sleepingNow && distM < 55));
+            (closing > (sleepingNow ? 700 : 260) || (!sleepingNow && distM < 55));
           if (threatened && bug.mode !== "stat") {
             bug.mode = "flee";
             bug.modeUntil = now + 650 + Math.random() * 350;
@@ -333,8 +335,9 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
           } else {
             // roam
             const idle = (now - bug.lastBother) / 1000;
-            // Sleeping bugs ignore slow cursor — only fast approach counts as bother
-            const uneasy = distM < 110 && (!sleepingNow || closing > 200);
+            // Sleeping bugs are completely unbothered by cursor proximity —
+            // only a fast swipe (closing > 700, same as threatened) wakes them
+            const uneasy = distM < 110 && (!sleepingNow || closing > 700);
             if (uneasy) bug.lastBother = now;
 
             if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) {
@@ -407,20 +410,19 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
 
-          // While inside the MOVING portrait image rect the bug is invisible —
-          // getBoundingClientRect on [data-portrait-moving] returns the visual
-          // (post-transform) position, so this stays accurate as user drags.
-          const pr = visibleRectOf("[data-portrait-moving]");
-          const underPortrait = !!pr &&
-            bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
-            bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;
-
           if (bug.mode === "hidden") {
             bug.el.style.zIndex = "1";
             bug.el.style.opacity = "0.15";
-          } else if (underPortrait) {
-            bug.el.style.zIndex = "1";
-            bug.el.style.opacity = "0";
+          } else if (!bug.emerged) {
+            // Portrait-born bug: hidden until it exits portrait bounds once.
+            // After first exit, emerged = true and it never hides again (no flicker).
+            const pr = visibleRectOf("[data-portrait-moving]");
+            const stillUnder = !!pr &&
+              bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
+              bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;
+            if (!stillUnder) bug.emerged = true;
+            bug.el.style.zIndex = stillUnder ? "1" : "30";
+            bug.el.style.opacity = stillUnder ? "0" : "1";
           } else {
             bug.el.style.zIndex = "30";
             bug.el.style.opacity = "1";
