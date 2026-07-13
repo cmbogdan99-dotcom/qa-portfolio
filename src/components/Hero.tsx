@@ -29,7 +29,7 @@ export function Hero() {
                 <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
                   {identity.role} <ThemeDot /> {identity.location}
                 </p>
-                <h1 data-secret-name className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+                <h1 data-secret-name className="mt-4 text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground" style={{ whiteSpace: "nowrap" }}>
                   {identity.name}
                 </h1>
                 {availability.open && (
