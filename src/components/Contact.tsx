@@ -30,7 +30,7 @@ export function Contact() {
             <button
               type="button"
               onClick={copyEmail}
-              className="rounded-lg border border-line bg-surface px-5 py-2.5 font-mono text-sm text-muted transition-colors hover:border-accent/50 hover:text-foreground"
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
             >
               {copied ? "Copied!" : links.email}
             </button>
@@ -38,7 +38,7 @@ export function Contact() {
               href={links.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-line bg-surface px-5 py-2.5 font-mono text-sm text-muted transition-colors hover:border-accent/50 hover:text-foreground"
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
             >
               LinkedIn
             </a>
@@ -46,14 +46,14 @@ export function Contact() {
               href={links.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-line bg-surface px-5 py-2.5 font-mono text-sm text-muted transition-colors hover:border-accent/50 hover:text-foreground"
+              className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm text-muted transition-colors hover:border-faint hover:text-foreground"
             >
               GitHub
             </a>
             <a
               href={links.cv}
               download
-              className="rounded-lg bg-accent px-5 py-2.5 font-mono text-sm font-medium text-white transition-opacity hover:opacity-85"
+              className="rounded-lg bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-85"
             >
               Download CV
             </a>

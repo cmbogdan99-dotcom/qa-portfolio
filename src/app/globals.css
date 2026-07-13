@@ -1,46 +1,24 @@
 @import "tailwindcss";
 
-/* Design tokens */
+/* Design tokens — see docs/02-design-system.md */
+/* Cool blue-gray monochrome, keyed to the hero portrait's
+   B&W office-glass tones so photo and page share one atmosphere. */
 :root {
-  --background: #0D0B08;
-  --surface: #141209;
-  --border: #28221A;
-  --foreground: #F0EBE2;
-  --muted: #7B7268;
-  --faint: #564E46;
-  --accent: #E8420C;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #F5F0E8;
-    --surface: #FDFAF5;
-    --border: #E0D8CC;
-    --foreground: #1A1510;
-    --muted: #6B6259;
-    --faint: #9B8F84;
-    --accent: #C43506;
-  }
-}
-
-[data-theme="dark"] {
-  --background: #0D0B08;
-  --surface: #141209;
-  --border: #28221A;
-  --foreground: #F0EBE2;
-  --muted: #7B7268;
-  --faint: #564E46;
-  --accent: #E8420C;
+  --background: #0a0b0d;
+  --surface: #101216;
+  --border: #242933;
+  --foreground: #eceef2;
+  --muted: #9aa1ad;
+  --faint: #697180;
 }
 
 [data-theme="light"] {
-  --background: #F5F0E8;
-  --surface: #FDFAF5;
-  --border: #E0D8CC;
-  --foreground: #1A1510;
-  --muted: #6B6259;
-  --faint: #9B8F84;
-  --accent: #C43506;
+  --background: #f2f4f7;
+  --surface: #ffffff;
+  --border: #dde1e8;
+  --foreground: #0d0f12;
+  --muted: #4b5362;
+  --faint: #8b96a6;
 }
 
 /* Smooth theme switch — class applied for 350 ms on <html> then removed */
@@ -62,52 +40,13 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
-  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-instrument-serif);
 }
 
 html {
-  scroll-padding-top: 5rem;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 3px; background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-* { scrollbar-width: thin; scrollbar-color: var(--faint) transparent; }
-
-/* Custom cursor — fine pointer (mouse) only */
-@media (pointer: fine) {
-  *, *::before, *::after { cursor: none !important; }
-
-  .cursor-dot {
-    position: fixed;
-    top: 0; left: 0;
-    width: 5px; height: 5px;
-    background: var(--accent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99999;
-    translate: -50% -50%;
-    will-change: transform;
-    transition: opacity 0.15s;
-  }
-
-  .cursor-ring {
-    position: fixed;
-    top: 0; left: 0;
-    width: 28px; height: 28px;
-    border: 1.5px solid var(--accent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99998;
-    translate: -50% -50%;
-    will-change: transform;
-    opacity: 0.35;
-    transition: opacity 0.2s, scale 0.15s;
-  }
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* offset anchors below the sticky nav */
 }
 
 @media (prefers-reduced-motion: reduce) {

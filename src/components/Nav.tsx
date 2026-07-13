@@ -43,7 +43,7 @@ export function Nav() {
       {/* Scroll progress bar */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-accent"
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-foreground/30"
         style={{ transform: `scaleX(${progress})` }}
       />
       <nav

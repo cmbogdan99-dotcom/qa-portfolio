@@ -13,13 +13,12 @@ export function Section({ id, label, title, children }: SectionProps) {
     <section id={id} aria-labelledby={`${id}-title`} className="py-16 md:py-20">
       <div className="mx-auto w-full max-w-6xl px-6">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-accent/70">
+          <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
             {label}
           </p>
           <h2
             id={`${id}-title`}
-            className="mt-3 font-display text-[30px] font-normal tracking-[-0.01em] text-foreground"
-            style={{ textWrap: "balance" }}
+            className="mt-3 text-[28px] font-semibold tracking-tight text-foreground"
           >
             {title}
           </h2>

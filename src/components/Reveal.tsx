@@ -1,46 +1,57 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 type RevealProps = {
   children: ReactNode;
+  /** "zoom" adds a slight scale-up on entry, used in the project gallery. */
   variant?: "fade" | "zoom";
+  /** Stagger delay in ms, applied to the entry transition only. */
   delay?: number;
 };
 
-const variants = {
-  hidden: (v: "fade" | "zoom") => ({
-    opacity: 0,
-    y: 16,
-    scale: v === "zoom" ? 0.95 : 1,
-  }),
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-  },
-};
-
+/**
+ * Progressive-enhancement scroll reveal. Elements animate every time they
+ * enter the viewport, not just once. The `reveal` class only hides content
+ * under `prefers-reduced-motion: no-preference` (see globals.css), so no-JS
+ * and reduced-motion users always see everything.
+ */
 export function Reveal({ children, variant = "fade", delay = 0 }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "0px 0px -48px 0px" });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Stagger only the entrance, so exits are instant and clean.
+          el.style.transitionDelay = delay ? `${delay}ms` : "";
+          el.classList.add("is-visible");
+        } else {
+          el.style.transitionDelay = "";
+          el.classList.remove("is-visible");
+        }
+      },
+      // Slightly negative bottom margin so elements are revealed a touch
+      // after entering, and hidden only once fully out of view.
+      { threshold: 0, rootMargin: "0px 0px -40px 0px" },
+    );
+
+    // Anchor jumps can land past an element before the observer fires;
+    // anything already at or above the viewport shows immediately.
+    if (el.getBoundingClientRect().top < window.innerHeight) {
+      el.classList.add("is-visible");
+    }
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
 
   return (
-    <motion.div
-      ref={ref}
-      custom={variant}
-      variants={variants}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      transition={{
-        duration: 0.55,
-        delay: delay / 1000,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-    >
+    <div ref={ref} className={variant === "zoom" ? "reveal reveal-zoom" : "reveal"}>
       {children}
-    </motion.div>
+    </div>
   );
 }
