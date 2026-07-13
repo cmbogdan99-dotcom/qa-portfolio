@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: identity.name,
     locale: "en_US",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   robots: { index: true, follow: true },
 };
