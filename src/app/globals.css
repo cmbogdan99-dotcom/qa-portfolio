@@ -186,7 +186,7 @@ img {
   animation: stat-pop-kf 0.6s ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
-  .splat {
+  .bug-splat {
     animation: none;
   }
 }
@@ -260,6 +260,10 @@ img {
   display: inline-block;
   cursor: default;
 }
+.skill-tag:hover {
+  color: var(--foreground);
+  transition: color 0.1s;
+}
 @media (prefers-reduced-motion: no-preference) {
   .skill-tag::after {
     content: attr(data-text);
@@ -273,11 +277,8 @@ img {
     animation: tag-glitch 0.35s steps(1) forwards;
     opacity: 1;
   }
-  .skill-tag:hover {
-    color: var(--foreground);
-    transition: color 0.1s;
-  }
 }
+
 
 /* Styled native accordion */
 details.deep-dive summary {

@@ -16,12 +16,11 @@ const hasPortrait = fs.existsSync(
 
 export function Hero() {
   return (
-    <section id="top" className="pt-32 pb-20 md:pt-52 md:pb-24">
-      {/* relative: the QaBug overlay roams this whole block, stats included.
-          Text and portrait sit at z-10 so bugs can dive under them (z-1)
-          or walk over them (z-20). */}
+    <section id="top" className="relative pt-32 pb-20 md:pt-52 md:pb-24">
       <div className="relative mx-auto w-full max-w-6xl px-6">
-        <QaBug />
+      {/* QaBug roams this content box; text and portrait sit at z-10 so
+          bugs can dive under them (z-1) or walk over them (z-20). */}
+      <QaBug />
 
         <div className="grid items-center gap-10 md:grid-cols-[1fr_auto] md:gap-12">
           <div className="relative z-10">

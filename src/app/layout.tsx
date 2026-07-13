@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://qa-portfolio-six-psi.vercel.app";
+const siteUrl = "https://bogdan-carcadea.ro";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
