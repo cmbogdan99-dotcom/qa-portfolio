@@ -257,6 +257,14 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
             bug.entering = false;
             bug.targetSpeed = 20;
           }
+          // React to fast cursor approach even while entering
+          if (!stale && distM < 90 && closing > 180) {
+            bug.entering = false;
+            bug.mode = "flee";
+            bug.modeUntil = now + 700 + Math.random() * 350;
+            bug.lastBother = now;
+            bug.pauseUntil = 0;
+          }
         } else {
 
           const threatened =
@@ -410,19 +418,23 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
 
+          const pr = visibleRectOf("[data-portrait-moving]");
+          const underPortrait = !!pr &&
+            bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
+            bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;
+
           if (bug.mode === "hidden") {
             bug.el.style.zIndex = "1";
             bug.el.style.opacity = "0.15";
           } else if (!bug.emerged) {
-            // Portrait-born bug: hidden until it exits portrait bounds once.
-            // After first exit, emerged = true and it never hides again (no flicker).
-            const pr = visibleRectOf("[data-portrait-moving]");
-            const stillUnder = !!pr &&
-              bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
-              bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;
-            if (!stillUnder) bug.emerged = true;
-            bug.el.style.zIndex = stillUnder ? "1" : "30";
-            bug.el.style.opacity = stillUnder ? "0" : "1";
+            // Portrait-born: hidden until first exit, then locks visible (no flicker on edge)
+            if (!underPortrait) bug.emerged = true;
+            bug.el.style.zIndex = underPortrait ? "1" : "30";
+            bug.el.style.opacity = underPortrait ? "0" : "1";
+          } else if (underPortrait) {
+            // All other bugs hide when crossing portrait — appear to go behind it
+            bug.el.style.zIndex = "1";
+            bug.el.style.opacity = "0";
           } else {
             bug.el.style.zIndex = "30";
             bug.el.style.opacity = "1";
