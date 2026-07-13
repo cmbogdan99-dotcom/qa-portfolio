@@ -26,7 +26,7 @@ export function PortraitDrag({ src, alt }: { src: string; alt: string }) {
     if (timer.current) clearTimeout(timer.current);
     if (!bugSpawned.current) {
       bugSpawned.current = true;
-      window.dispatchEvent(new CustomEvent("qa-bug-spawn"));
+      window.dispatchEvent(new CustomEvent("qa-bug-spawn-portrait"));
     }
   };
 

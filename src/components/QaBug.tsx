@@ -134,8 +134,6 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     const portrait = visibleRectOf("[data-bug-hide]");
 
     if (portrait && Math.random() < 0.45) {
-      // Come in from the right edge at portrait height — looks like it
-      // emerged from behind the photo without starting inside the container.
       sx = w + 20;
       sy = portrait.y + portrait.h * (0.1 + Math.random() * 0.8);
     } else {
@@ -150,6 +148,29 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     bugsRef.current.push(bug);
     setBugIds((ids) => [...ids, bug.id]);
   }, [visibleRectOf]);
+
+  // First bug: spawns inside portrait bounds, crawls out when startled by drag.
+  // Invisible while inside portrait rect (opacity 0, z 1) — see step loop.
+  const spawnFromPortrait = useCallback(() => {
+    const area = areaRef.current;
+    if (!area) return;
+    const { width: w, height: h } = area.getBoundingClientRect();
+    const portrait = visibleRectOf("[data-bug-hide]");
+    if (!portrait) { spawn(); return; }
+    const now = performance.now();
+    const sx = portrait.x + portrait.w * 0.6;
+    const sy = portrait.y + portrait.h * 0.55;
+    const bug = makeBug(w, h, now, sx, sy);
+    bug.entering = false;
+    bug.x = sx;
+    bug.y = sy;
+    bug.speed = 6;
+    bug.targetSpeed = 45;
+    bug.tx = Math.max(12, portrait.x - 20 - Math.random() * 40);
+    bug.ty = portrait.y + portrait.h * (0.3 + Math.random() * 0.4);
+    bugsRef.current.push(bug);
+    setBugIds((ids) => [...ids, bug.id]);
+  }, [visibleRectOf, spawn]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -186,6 +207,8 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
 
     const onSpawn = () => { if (bugsRef.current.length < 3) spawn(); };
     window.addEventListener("qa-bug-spawn", onSpawn);
+    const onPortraitSpawn = () => { if (bugsRef.current.length < 3) spawnFromPortrait(); };
+    window.addEventListener("qa-bug-spawn-portrait", onPortraitSpawn);
 
     const onKonami = () => {
       for (const bug of bugsRef.current) {
@@ -381,8 +404,25 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
 
         if (bug.el) {
           bug.el.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
-          bug.el.style.zIndex = bug.mode === "hidden" ? "1" : "30";
-          bug.el.style.opacity = bug.mode === "hidden" ? "0.15" : "1";
+
+          // While a bug is physically inside the portrait rect it should be
+          // invisible (z below portrait, opacity 0) so it appears to emerge
+          // from underneath as it crawls out.
+          const pr = visibleRectOf("[data-bug-hide]");
+          const underPortrait = !!pr &&
+            bug.x > pr.x + 8 && bug.x < pr.x + pr.w - 8 &&
+            bug.y > pr.y + 8 && bug.y < pr.y + pr.h - 8;
+
+          if (bug.mode === "hidden") {
+            bug.el.style.zIndex = "1";
+            bug.el.style.opacity = "0.15";
+          } else if (underPortrait) {
+            bug.el.style.zIndex = "1";
+            bug.el.style.opacity = "0";
+          } else {
+            bug.el.style.zIndex = "30";
+            bug.el.style.opacity = "1";
+          }
           if (bug.mode === "stat") bug.el.classList.add("bug-seeking");
           else bug.el.classList.remove("bug-seeking");
 
@@ -405,9 +445,10 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
       io.disconnect();
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("qa-bug-spawn", onSpawn);
+      window.removeEventListener("qa-bug-spawn-portrait", onPortraitSpawn);
       window.removeEventListener("qa-bug-konami", onKonami);
     };
-  }, [spawn, visibleRectOf, addReport]);
+  }, [spawn, spawnFromPortrait, visibleRectOf, addReport]);
 
   const kill = (id: number) => {
     const bug = bugsRef.current.find((b) => b.id === id);

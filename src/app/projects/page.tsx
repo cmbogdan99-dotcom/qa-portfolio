@@ -38,7 +38,12 @@ function imageFor(slug: string): string | null {
   return match ? `/projects/${match}` : null;
 }
 
-const studios = ["Personal projects", "Ubisoft", "Electronic Arts", "Avantaj Play"];
+// Non-gaming domains shown first; Ubisoft + EA grouped under one "Gaming" header.
+const domainGroups: { label: string; studios: string[] }[] = [
+  { label: "Personal projects", studios: ["Personal projects"] },
+  { label: "Avantaj Play", studios: ["Avantaj Play"] },
+  { label: "Gaming — Ubisoft & EA", studios: ["Ubisoft", "Electronic Arts"] },
+];
 
 export default function ProjectsPage() {
   return (
@@ -57,12 +62,13 @@ export default function ProjectsPage() {
           projects.
         </p>
 
-        {studios.map((studio) => {
-          const items = gallery.filter((g) => g.studio === studio);
+        {domainGroups.map(({ label, studios }) => {
+          const items = gallery.filter((g) => studios.includes(g.studio));
+          if (items.length === 0) return null;
           return (
-            <section key={studio} className="mt-16">
+            <section key={label} className="mt-16">
               <h2 className="font-mono text-[13px] uppercase tracking-[0.2em] text-faint">
-                {studio}
+                {label}
               </h2>
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((item, i) => {
