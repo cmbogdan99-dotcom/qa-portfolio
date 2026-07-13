@@ -11,13 +11,37 @@ const KONAMI = [
 function glitchElement(el: HTMLElement) {
   if (el.dataset.glitching) return;
   el.dataset.glitching = "1";
-  el.classList.add("name-glitching");
-  const onEnd = () => {
-    el.classList.remove("name-glitching");
-    delete el.dataset.glitching;
-    el.removeEventListener("animationend", onEnd);
-  };
-  el.addEventListener("animationend", onEnd);
+  const original = el.textContent ?? "";
+  const POOL = "·—_∙abcdefghijklmnopqrstuvwxyz";
+  let frame = 0;
+  const TOTAL = 48;
+  let nonSpaceCount = 0;
+  for (const ch of original) if (ch !== " ") nonSpaceCount++;
+
+  const prev = el.style.whiteSpace;
+  el.style.whiteSpace = "nowrap";
+
+  const id = window.setInterval(() => {
+    frame++;
+    if (frame >= TOTAL) {
+      el.textContent = original;
+      el.style.whiteSpace = prev;
+      delete el.dataset.glitching;
+      clearInterval(id);
+      return;
+    }
+    const resolved = Math.floor((frame / TOTAL) * nonSpaceCount);
+    let r = 0;
+    el.textContent = original
+      .split("")
+      .map((ch) => {
+        if (ch === " ") return " ";
+        const shouldResolve = r < resolved;
+        r++;
+        return shouldResolve ? ch : POOL[Math.floor(Math.random() * POOL.length)];
+      })
+      .join("");
+  }, 16);
 }
 
 export function Secrets() {
