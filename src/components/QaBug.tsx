@@ -153,8 +153,9 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // First bug spawns after 30s
-    const firstSpawn = window.setTimeout(spawn, 30000);
+    // First bug spawns on portrait drag (see PortraitDrag.tsx); this is a
+    // fallback for users who never interact with the portrait.
+    const firstSpawn = window.setTimeout(spawn, 90000);
 
     const io = new IntersectionObserver(
       ([entry]) => { activeRef.current = entry.isIntersecting; },
@@ -215,6 +216,14 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
         const distM = Math.hypot(dxm, dym);
         const closing = stale ? 0 : (-(m.vx * dxm) - m.vy * dym) / Math.max(distM, 1);
 
+        // Computed before mode logic so it's in scope for both the mode block and bug.el render
+        const sleepingNow =
+          !bug.entering &&
+          bug.mode === "roam" &&
+          bug.speed < 1 &&
+          now < bug.pauseUntil &&
+          now - bug.pauseStart > 1500;
+
         if (bug.entering) {
           bug.targetSpeed = 70;
           if (Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 14) {
@@ -222,8 +231,11 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
             bug.targetSpeed = 20;
           }
         } else {
-          // Flee on fast approach OR when cursor is very close and moving
-          const threatened = !stale && distM < 130 && (closing > 260 || distM < 55);
+
+          const threatened =
+            !stale &&
+            distM < 130 &&
+            (closing > (sleepingNow ? 420 : 260) || (!sleepingNow && distM < 55));
           if (threatened && bug.mode !== "stat") {
             bug.mode = "flee";
             bug.modeUntil = now + 650 + Math.random() * 350;
@@ -296,7 +308,8 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
           } else {
             // roam
             const idle = (now - bug.lastBother) / 1000;
-            const uneasy = distM < 110;
+            // Sleeping bugs ignore slow cursor — only fast approach counts as bother
+            const uneasy = distM < 110 && (!sleepingNow || closing > 200);
             if (uneasy) bug.lastBother = now;
 
             if (now > bug.pauseUntil && Math.hypot(bug.tx - bug.x, bug.ty - bug.y) < 8) {
@@ -373,16 +386,9 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
           if (bug.mode === "stat") bug.el.classList.add("bug-seeking");
           else bug.el.classList.remove("bug-seeking");
 
-          // Sleeping: bug has been paused for 1.5s+ and has nearly stopped
-          const isSleeping =
-            !bug.entering &&
-            bug.mode === "roam" &&
-            bug.speed < 1 &&
-            now < bug.pauseUntil &&
-            now - bug.pauseStart > 1500;
-          if (isSleeping) {
+          if (sleepingNow && !bug.entering) {
             bug.el.classList.add("bug-sleeping");
-          } else {
+          } else if (!sleepingNow || bug.entering) {
             bug.el.classList.remove("bug-sleeping");
           }
         }

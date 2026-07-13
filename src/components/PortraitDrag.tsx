@@ -13,6 +13,7 @@ export function PortraitDrag({ src, alt }: { src: string; alt: string }) {
   const startCx = useRef(0);
   const startOff = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const bugSpawned = useRef(false);
 
   const revealed = offsetX > 24;
 
@@ -23,6 +24,10 @@ export function PortraitDrag({ src, alt }: { src: string; alt: string }) {
     startCx.current = e.clientX;
     startOff.current = offsetX;
     if (timer.current) clearTimeout(timer.current);
+    if (!bugSpawned.current) {
+      bugSpawned.current = true;
+      window.dispatchEvent(new CustomEvent("qa-bug-spawn"));
+    }
   };
 
   const move = (e: React.PointerEvent<HTMLDivElement>) => {
