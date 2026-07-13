@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { identity } from "@/content/site";
 import { BackToTop } from "@/components/BackToTop";
@@ -68,6 +69,7 @@ export default function RootLayout({
         <BackToTop />
         <ConsoleEgg />
         <Secrets />
+        <Analytics />
       </body>
     </html>
   );
