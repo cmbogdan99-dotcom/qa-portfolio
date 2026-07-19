@@ -1,0 +1,28 @@
+name: Lighthouse
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Monthly run so scores stay visible even without pushes
+    - cron: "0 8 1 * *"
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      # Wait for Vercel to pick up the push before auditing production
+      - name: Wait for deploy
+        if: github.event_name == 'push'
+        run: sleep 90
+
+      - name: Audit production
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://bogdan-carcadea.ro
+            https://bogdan-carcadea.ro/projects
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 3

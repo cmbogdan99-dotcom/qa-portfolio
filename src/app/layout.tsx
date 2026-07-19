@@ -7,6 +7,8 @@ import { BackToTop } from "@/components/BackToTop";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
 import { Secrets } from "@/components/Secrets";
 import { LenisProvider } from "@/components/LenisProvider";
+import { CommandPalette } from "@/components/CommandPalette";
+import { ViewTransitions } from "@/components/ViewTransitions";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +69,8 @@ export default function RootLayout({
         <LenisProvider />
         {children}
         <BackToTop />
+        <CommandPalette />
+        <ViewTransitions />
         <ConsoleEgg />
         <Secrets />
         <Analytics />

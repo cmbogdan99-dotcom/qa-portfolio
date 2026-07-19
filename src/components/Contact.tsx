@@ -4,6 +4,7 @@ import { useState } from "react";
 import { identity, links, philosophyLine } from "@/content/site";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
+import { TestRun } from "./TestRun";
 
 export function Contact() {
   const [copied, setCopied] = useState(false);
@@ -61,7 +62,8 @@ export function Contact() {
         </Reveal>
       </Section>
 
-      <footer className="border-t border-line py-10">
+      <footer className="border-t border-line pb-10 pt-2">
+        <TestRun />
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6">
           <p className="text-sm text-faint">
             © {new Date().getFullYear()} {identity.name}

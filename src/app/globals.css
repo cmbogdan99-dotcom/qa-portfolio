@@ -272,6 +272,30 @@ img {
   --avail-bg: rgb(236 253 245 / 0.8);
 }
 
+/* Page navigation cross-fade via the View Transitions API */
+::view-transition-old(root) {
+  animation: 200ms ease-out both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 260ms ease-in both vt-fade-in;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Footer test-run strip: pass lines in a muted success green */
+.testrun-ok { color: #4a7c59; }
+[data-theme="light"] .testrun-ok { color: #3d7a52; }
+
 /* Skill tag glitch on hover */
 @keyframes tag-glitch {
   0%   { clip-path: inset(0 0 100% 0); transform: translate(0); }
