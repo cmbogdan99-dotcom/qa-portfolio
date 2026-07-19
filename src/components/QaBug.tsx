@@ -29,7 +29,45 @@ type BugState = {
 
 type Report = { id: number; x: number; y: number; title: string; text: string };
 type Ghost = { id: number; x: number; y: number; angle: number };
-type Splat = { id: number; x: number; y: number; r: number };
+type Splat = { id: number; x: number; y: number; r: number; angle: number; variant: number };
+
+// Organic splat blobs — irregular hand-drawn outlines instead of ellipses.
+// Each variant pairs a main stain with directional droplets + thin streaks.
+const splatVariants = [
+  {
+    blob: "M-4.8,-2.1 C-5.9,-4.0 -3.2,-5.6 -1.0,-4.8 C0.8,-6.1 3.6,-5.0 4.4,-3.0 C6.2,-2.2 6.0,0.4 4.6,1.6 C5.2,3.6 2.8,5.3 0.7,4.5 C-1.2,5.8 -4.0,4.7 -4.3,2.5 C-6.4,1.8 -6.2,-0.7 -4.8,-2.1 Z",
+    drops: [
+      { cx: 6.8, cy: -4.2, r: 1.3 }, { cx: -6.6, cy: 2.8, r: 1.0 },
+      { cx: 2.4, cy: 6.6, r: 0.9 }, { cx: -3.4, cy: -6.4, r: 0.7 },
+    ],
+    streaks: [
+      { x1: 4.6, y1: -2.8, x2: 7.4, y2: -4.6 },
+      { x1: -4.4, y1: 1.8, x2: -7.2, y2: 3.2 },
+    ],
+  },
+  {
+    blob: "M-5.4,0.2 C-6.3,-2.2 -4.0,-4.4 -1.8,-4.0 C-0.4,-5.9 2.6,-5.7 3.8,-3.8 C6.0,-3.4 6.6,-0.8 5.2,0.8 C6.1,2.8 4.0,4.9 1.9,4.3 C0.4,6.0 -2.6,5.6 -3.4,3.7 C-5.6,3.5 -6.5,1.6 -5.4,0.2 Z",
+    drops: [
+      { cx: -6.9, cy: -3.0, r: 1.2 }, { cx: 7.0, cy: 1.8, r: 1.0 },
+      { cx: 0.6, cy: -7.0, r: 0.8 }, { cx: 4.6, cy: 6.2, r: 0.6 },
+    ],
+    streaks: [
+      { x1: -4.8, y1: -2.2, x2: -7.6, y2: -3.6 },
+      { x1: 5.0, y1: 1.2, x2: 7.8, y2: 2.2 },
+    ],
+  },
+  {
+    blob: "M-4.2,-3.2 C-2.8,-5.5 0.4,-5.9 2.2,-4.4 C4.6,-4.8 6.4,-2.4 5.4,-0.4 C6.8,1.4 5.2,3.8 3.0,3.8 C2.2,5.9 -0.9,6.3 -2.4,4.6 C-4.8,5.0 -6.6,2.6 -5.4,0.6 C-6.4,-1.2 -5.8,-2.8 -4.2,-3.2 Z",
+    drops: [
+      { cx: 6.6, cy: -3.6, r: 1.1 }, { cx: -6.2, cy: 4.0, r: 1.1 },
+      { cx: -1.8, cy: -6.8, r: 0.7 }, { cx: 5.8, cy: 4.8, r: 0.7 },
+    ],
+    streaks: [
+      { x1: 4.2, y1: -2.4, x2: 7.0, y2: -4.0 },
+      { x1: -3.8, y1: 2.8, x2: -6.6, y2: 4.4 },
+    ],
+  },
+];
 
 let nextId = 1;
 let nextNoteId = 1;
@@ -506,7 +544,14 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     setGhosts((g) => [...g, ghost]);
     window.setTimeout(() => setGhosts((g) => g.filter((v) => v.id !== ghost.id)), 400);
 
-    const splat: Splat = { id: bug.id, x: bug.x, y: bug.y, r: 6 + Math.random() * 5 };
+    const splat: Splat = {
+      id: bug.id,
+      x: bug.x,
+      y: bug.y,
+      r: 6 + Math.random() * 5,
+      angle: Math.random() * 360,
+      variant: Math.floor(Math.random() * splatVariants.length),
+    };
     setSplats((s) => [...s, splat]);
     window.setTimeout(() => setSplats((s) => s.filter((v) => v.id !== splat.id)), 5200);
 
@@ -578,24 +623,36 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
         </span>
       ))}
 
-      {splats.map((s) => (
-        <svg
-          key={`splat-${s.id}`}
-          className="bug-splat absolute z-40"
-          width={s.r * 4}
-          height={s.r * 4}
-          viewBox="-10 -10 20 20"
-          style={{ left: s.x - s.r * 2, top: s.y - s.r * 2 }}
-          aria-hidden="true"
-        >
-          <ellipse cx="0" cy="0" rx="5.5" ry="4" fill="var(--faint)" opacity="0.7" />
-          <circle cx="5" cy="-3" r="1.8" fill="var(--faint)" opacity="0.5" />
-          <circle cx="-5.5" cy="1.5" r="1.4" fill="var(--faint)" opacity="0.45" />
-          <circle cx="1" cy="5" r="1.2" fill="var(--faint)" opacity="0.4" />
-          <circle cx="-2" cy="-5" r="1" fill="var(--faint)" opacity="0.35" />
-          <circle cx="6.5" cy="2" r="0.9" fill="var(--faint)" opacity="0.3" />
-        </svg>
-      ))}
+      {splats.map((s) => {
+        const v = splatVariants[s.variant];
+        return (
+          <svg
+            key={`splat-${s.id}`}
+            className="bug-splat absolute z-40"
+            width={s.r * 4}
+            height={s.r * 4}
+            viewBox="-10 -10 20 20"
+            style={{ left: s.x - s.r * 2, top: s.y - s.r * 2 }}
+            aria-hidden="true"
+          >
+            <g transform={`rotate(${s.angle})`}>
+            <path d={v.blob} fill="var(--faint)" opacity="0.55" />
+            {/* Slightly offset darker core gives the stain depth */}
+            <path d={v.blob} fill="var(--faint)" opacity="0.3" transform="scale(0.55) translate(0.8 0.5)" />
+            {v.streaks.map((l, i) => (
+              <line
+                key={`l-${i}`}
+                x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+                stroke="var(--faint)" strokeWidth="0.7" strokeLinecap="round" opacity="0.4"
+              />
+            ))}
+            {v.drops.map((d, i) => (
+              <circle key={`d-${i}`} cx={d.cx} cy={d.cy} r={d.r} fill="var(--faint)" opacity={0.42 - i * 0.06} />
+            ))}
+            </g>
+          </svg>
+        );
+      })}
 
       {reports.map((r) => (
         <div

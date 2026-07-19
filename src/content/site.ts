@@ -51,10 +51,10 @@ export const caseStudies: CaseStudy[] = [
       "Introduced automated testing across core application flows using C#, Unity Test Framework, AltTester, and Python, removing repetitive smoke and regression passes.",
       "Redesigned the Jira workflows and tracking boards; the reporting standard is now used daily by QA, development, art, and management.",
       "Took over the department's technical hiring: running assessments, then training and mentoring the testers I helped bring in.",
-      "Produce end-of-sprint video summaries for cross-functional stakeholders: completed work, blockers, and upcoming milestones.",
+      "Produce end-of-sprint summaries for cross-functional stakeholders: completed and in-progress work alongside critical milestones.",
     ],
     outcome:
-      "Manual QA effort dropped by about half per sprint, the defect pipeline is used by the whole studio, and the QA function now scales beyond one person. Coverage extends to other internal products, including a finance-focused VR application.",
+      "Manual QA effort dropped by about half per sprint, the defect pipeline is used by the whole studio, and the QA function now scales beyond one person. Coverage extends to other internal products, including an internal specialized VR application.",
   },
   {
     number: "02",
@@ -64,12 +64,12 @@ export const caseStudies: CaseStudy[] = [
       "Productions like Assassin's Creed Shadows, Star Wars Outlaws, Assassin's Creed Valhalla, and Watch Dogs: Legion ship across PlayStation, Xbox, PC, and mobile, with a state-space no team can test exhaustively. Build cadence swung with context, from one or two builds a week in quiet phases to 8-10 a day near release.",
     approach: [
       "Worked in a strike-team model: rotated onto projects needing senior coverage, delivered analysis and reports, moved to the next.",
-      "As Quality Analyst Technician, covered specific features and areas sprint by sprint. On selected projects this included coordinating a team of 15 expert testers: allocating tasks, tracking technical KPIs, and reporting to QC leadership.",
+      "As Quality Analyst Technician, served as technical lead on select projects across dedicated sprint rotations: coordinating tester allocation, tracking KPIs, and reporting to QC leadership.",
       "Applied risk-based, functional, and non-functional testing to keep coverage meaningful when exhaustive testing was impossible.",
       "Supported milestone delivery, platform compliance, and certification across console generations, PC, and mobile.",
     ],
     outcome:
-      "Contributed to an estimated 10,000+ reported defects across the portfolio, and was trusted with team coordination without holding the lead title.",
+      "Contributed to an estimated 10,000+ reported defects across the portfolio, and was trusted as technical lead on select projects without holding the lead title.",
   },
   {
     number: "03",
@@ -80,6 +80,7 @@ export const caseStudies: CaseStudy[] = [
     approach: [
       "Built a single reusable framework, with AI-assisted development in Claude Code, that runs automated suites for level validation, game-logic checks, and functional coverage across performance, visual, audio, event, notification, and monetization systems.",
       "Simulated multiple player personas through configurable alter-ego profiles (distinct playstyle presets) across parallel multi-device sessions, validating personality-driven mechanics and progression loops.",
+      "Hunts and reports defects autonomously: extracting device logs, capturing screenshot and video evidence, and generating structured bug reports with full reproduction context.",
       "Designed it to adapt to new levels and content updates instead of being rewritten for them.",
       "Building Playwright and TypeScript skills through a personal portfolio project: UI end-to-end tests, API testing, Page Object Model, fixtures, and GitHub Actions CI, to develop capability I want to bring to a team.",
     ],
@@ -89,14 +90,14 @@ export const caseStudies: CaseStudy[] = [
   {
     number: "04",
     name: "Fitness AI",
-    context: "Personal project · live PWA with cloud backend",
+    context: "Personal project · live PWA on Cloudflare Workers + Firebase",
     challenge:
       "A solo project run like a real product, to practice the engineering discipline QA usually observes from the outside: Git/PR workflow, release practices, and owning defects I wrote myself.",
     approach: [
       "Built a predictive analytics engine: regression-based progress forecasting with confidence scoring, self-correcting calorie targets, and meal planning that respects dietary restrictions.",
-      "Integrated an AI conversational coach (Claude, Gemini, OpenAI) with persistent long-term memory and daily briefings.",
-      "Strength-training tracking with progressive-overload recommendations and automatic plateau detection, on a unified account architecture for secure cross-device authentication.",
-      "JavaScript, Firebase, and LLM API integration, developed end to end inside a PR-based workflow.",
+      "Integrated an AI conversational coach (Claude, Gemini, Groq) with persistent long-term memory and proactive daily briefings, maintaining continuity across sessions.",
+      "Implemented a gamification engine: XP progression, reward shop, wager challenges, power-ups, and clan boosts to drive sustained long-term engagement.",
+      "JavaScript, Firebase, Cloudflare Workers, and LLM API integration, developed end to end inside a PR-based workflow.",
     ],
     outcome:
       "A live, working app, and a better understanding of the developer's side of the defect lifecycle. It changed how I write bug reports and how I design automation.",
@@ -130,7 +131,7 @@ export const experience: Experience[] = [
       {
         title: "Quality Analyst Technician",
         period: "Jun 2024 — Aug 2025",
-        note: "Strike-team role: expert coverage on assigned features and areas across projects; on selected projects also coordinated a team of 15 expert testers, with KPIs and reporting to QC leadership.",
+        note: "Strike-team role: expert coverage on assigned features and areas across projects; technical lead on select projects across sprint rotations, with tester allocation, KPIs, and reporting to QC leadership.",
       },
       {
         title: "QC Tester",
@@ -281,7 +282,7 @@ export const gallery: GalleryItem[] = [
   { slug: "sugar-madness", name: "Sugar Madness", studio: "Avantaj Play", detail: "Casual game · VR, Browser" },
   { slug: "jolly-match-3", name: "Jolly Match 3", studio: "Avantaj Play", detail: "Puzzle · Mobile" },
   { slug: "jolly-match-3-ar", name: "Jolly Match 3 AR", studio: "Avantaj Play", detail: "Puzzle · VR/AR" },
-  { slug: "finance-ar", name: "Finance VR Application", studio: "Avantaj Play", detail: "Finance tool · VR, internal product" },
+  { slug: "finance-ar", name: "Internal VR Application", studio: "Avantaj Play", detail: "Specialized tool · VR, internal product" },
   { slug: "match3-framework", name: "Match-3 QA Framework", studio: "Personal projects", detail: "Test automation · Mobile games" },
   { slug: "fitness-ai", name: "Fitness AI", studio: "Personal projects", detail: "Fitness app · Web, Mobile", href: "https://cmbogdan99-dotcom.github.io/dltate/", hrefLabel: "Open app" },
   { slug: "qa-automation-portfolio", name: "QA Automation Portfolio", studio: "Personal projects", detail: "Playwright · TypeScript · CI/CD", href: "https://github.com/cmbogdan99-dotcom/qa-automation-portfolio", hrefLabel: "View on GitHub" },
