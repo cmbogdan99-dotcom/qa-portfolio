@@ -38,11 +38,23 @@ function imageFor(slug: string): string | null {
   return match ? `/projects/${match}` : null;
 }
 
-// Non-gaming domains shown first; Ubisoft + EA grouped under one "Gaming" header.
-const domainGroups: { label: string; studios: string[] }[] = [
-  { label: "Personal projects", studios: ["Personal projects"] },
-  { label: "Avantaj Play", studios: ["Avantaj Play"] },
-  { label: "Gaming — Ubisoft & EA", studios: ["Ubisoft", "Electronic Arts"] },
+// Non-gaming domains shown first; every game (Ubisoft, EA, and Avantaj Play
+// titles) lives under one "Gaming" header, with Ubisoft/EA listed first.
+const avantajGameSlugs = ["sugar-madness", "jolly-match-3", "jolly-match-3-ar"];
+
+const domainGroups: { label: string; filter: (g: (typeof gallery)[number]) => boolean }[] = [
+  { label: "Personal projects", filter: (g) => g.studio === "Personal projects" },
+  {
+    label: "Avantaj Play",
+    filter: (g) => g.studio === "Avantaj Play" && !avantajGameSlugs.includes(g.slug),
+  },
+  {
+    label: "Gaming",
+    filter: (g) =>
+      g.studio === "Ubisoft" ||
+      g.studio === "Electronic Arts" ||
+      avantajGameSlugs.includes(g.slug),
+  },
 ];
 
 export default function ProjectsPage() {
@@ -62,8 +74,8 @@ export default function ProjectsPage() {
           projects.
         </p>
 
-        {domainGroups.map(({ label, studios }) => {
-          const items = gallery.filter((g) => studios.includes(g.studio));
+        {domainGroups.map(({ label, filter }) => {
+          const items = gallery.filter(filter);
           if (items.length === 0) return null;
           return (
             <section key={label} className="mt-16">
