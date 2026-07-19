@@ -21,7 +21,8 @@ type BugState = {
   lastBother: number;
   phase: number;
   entering: boolean;
-  emerged: boolean; // true once bug has exited portrait bounds for first time
+  emerged: boolean;
+  portraitBorn: boolean; // permanently skips underPortrait hiding — it IS the one that came out
   el: HTMLButtonElement | null;
   inner: HTMLSpanElement | null;
 };
@@ -61,12 +62,14 @@ function makeBug(w: number, h: number, now: number, sx: number, sy: number): Bug
     lastBother: now,
     phase: Math.random() * 10,
     entering: true,
-    emerged: true, // normal bugs are immediately visible; portrait bugs set this to false
+    emerged: true,
+    portraitBorn: false,
     el: null,
     inner: null,
   };
 }
 
+const MAX_BUGS = 3;
 const DUPLICATE_CAP = 14;
 
 const duplicateMessages = [
@@ -126,7 +129,7 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
 
   const spawn = useCallback(() => {
     const area = areaRef.current;
-    if (!area) return;
+    if (!area || bugsRef.current.length >= MAX_BUGS) return;
     const { width: w, height: h } = area.getBoundingClientRect();
 
     // All bugs enter from outside the container boundary so overflow:hidden
@@ -154,7 +157,7 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
   // Invisible while inside portrait rect (opacity 0, z 1) — see step loop.
   const spawnFromPortrait = useCallback(() => {
     const area = areaRef.current;
-    if (!area) return;
+    if (!area || bugsRef.current.length >= MAX_BUGS) return;
     const { width: w, height: h } = area.getBoundingClientRect();
     // Use the moving element's visual rect (accounts for CSS transform)
     const portrait = visibleRectOf("[data-portrait-moving]");
@@ -165,7 +168,8 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
     const sy = portrait.y + portrait.h * 0.55;
     const bug = makeBug(w, h, now, sx, sy);
     bug.entering = false;
-    bug.emerged = false; // hidden until it crawls out from under portrait
+    bug.emerged = false;
+    bug.portraitBorn = true; // permanently exempts this bug from underPortrait re-hiding
     bug.x = sx;
     bug.y = sy;
     bug.speed = 6;
@@ -427,12 +431,13 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
             bug.el.style.zIndex = "1";
             bug.el.style.opacity = "0.15";
           } else if (!bug.emerged) {
-            // Portrait-born: hidden until first exit, then locks visible (no flicker on edge)
+            // Portrait-born pre-emergence: hidden until it crawls out of portrait bounds
             if (!underPortrait) bug.emerged = true;
             bug.el.style.zIndex = underPortrait ? "1" : "30";
             bug.el.style.opacity = underPortrait ? "0" : "1";
-          } else if (underPortrait) {
-            // All other bugs hide when crossing portrait — appear to go behind it
+          } else if (!bug.portraitBorn && underPortrait) {
+            // Regular bugs hide when crossing portrait — appear to go behind it
+            // Portrait-born bug is exempt: once emerged it stays visible regardless
             bug.el.style.zIndex = "1";
             bug.el.style.opacity = "0";
           } else {
@@ -537,7 +542,11 @@ export function QaBug({ duplicateOnKill = false }: { duplicateOnKill?: boolean }
           key={id}
           ref={(el) => {
             const bug = bugsRef.current.find((b) => b.id === id);
-            if (bug) bug.el = el;
+            if (bug) {
+              bug.el = el;
+              // Pre-hide portrait-born bugs on mount to prevent 1-frame opacity flash
+              if (el && !bug.emerged) { el.style.opacity = "0"; el.style.zIndex = "1"; }
+            }
           }}
           type="button"
           tabIndex={-1}
