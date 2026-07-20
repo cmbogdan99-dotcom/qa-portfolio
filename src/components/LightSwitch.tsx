@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 
 // A pull-cord light switch hanging from under the nav (desktop only).
 // Pulling it toggles the theme — the discoverable sibling of the hidden
-// ThemeDot in the hero eyebrow.
+// ThemeDot in the hero eyebrow. The pull is animated with WAAPI so no CSS
+// specificity or re-render timing can swallow it.
 export function LightSwitch() {
-  const [pulling, setPulling] = useState(false);
+  const busy = useRef(false);
 
-  const pull = () => {
-    if (pulling) return;
-    setPulling(true);
+  const pull = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (busy.current) return;
+    busy.current = true;
+
+    e.currentTarget.animate(
+      [
+        { transform: "scaleY(1)" },
+        { transform: "scaleY(1.35)", offset: 0.35 },
+        { transform: "scaleY(0.97)", offset: 0.75 },
+        { transform: "scaleY(1)" },
+      ],
+      { duration: 520, easing: "cubic-bezier(0.34, 1.2, 0.64, 1)" },
+    );
+
+    // Flip the theme at the bottom of the pull
     setTimeout(() => {
       const cur = document.documentElement.getAttribute("data-theme");
       const next = cur === "light" ? "dark" : "light";
@@ -21,8 +34,11 @@ export function LightSwitch() {
         () => document.documentElement.classList.remove("theme-transition"),
         350,
       );
-    }, 160);
-    setTimeout(() => setPulling(false), 420);
+    }, 180);
+
+    setTimeout(() => {
+      busy.current = false;
+    }, 520);
   };
 
   return (
@@ -31,7 +47,7 @@ export function LightSwitch() {
       onClick={pull}
       aria-label="Toggle light"
       title="Lights"
-      className={`light-cord fixed right-10 top-16 z-40 hidden md:block ${pulling ? "light-cord-pulled" : ""}`}
+      className="light-cord fixed right-10 top-16 z-40 hidden md:block"
     >
       <svg width="14" height="72" viewBox="0 0 14 72" fill="none" aria-hidden="true">
         {/* cord */}

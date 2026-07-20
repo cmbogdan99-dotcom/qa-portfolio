@@ -272,22 +272,19 @@ img {
   --avail-bg: rgb(236 253 245 / 0.8);
 }
 
-/* Pull-cord theme switch: hangs from the top edge, stretches on hover/pull */
+/* Pull-cord theme switch: only opacity reacts to hover; the pull itself is
+   animated from JS (WAAPI) so nothing can override it */
 .light-cord {
   cursor: grab;
   opacity: 0.55;
   transform-origin: top center;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 .light-cord:hover {
   opacity: 1;
-  transform: scaleY(1.06);
 }
 .light-cord:active {
   cursor: grabbing;
-}
-.light-cord-pulled {
-  transform: scaleY(1.28);
 }
 
 /* Page navigation cross-fade via the View Transitions API */
