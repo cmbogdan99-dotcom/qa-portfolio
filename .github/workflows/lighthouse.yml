@@ -12,6 +12,9 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
+      # Needed so the LHCI uploader can resolve the current commit hash
+      - uses: actions/checkout@v4
+
       # Wait for Vercel to pick up the push before auditing production
       - name: Wait for deploy
         if: github.event_name == 'push'
