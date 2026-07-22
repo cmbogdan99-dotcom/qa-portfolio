@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: `${identity.name} · ${identity.role}`,
   description:
-    "QA Automation Engineer building Playwright and TypeScript test frameworks with a Python API layer and CI/CD, backed by five years of senior QA across AAA and cross-platform software.",
+    "Senior QA Engineer with five years across AAA and cross-platform software, building test automation in Playwright and TypeScript with a Python API layer and CI/CD on personal projects.",
   openGraph: {
     title: `${identity.name} · ${identity.role}`,
     description:

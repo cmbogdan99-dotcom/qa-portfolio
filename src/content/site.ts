@@ -3,10 +3,10 @@
 
 export const identity = {
   name: "Bogdan Carcadea",
-  role: "QA Automation Engineer",
+  role: "Senior QA Engineer",
   location: "Bucharest, Romania",
   tagline:
-    "I build test automation in Playwright and TypeScript, with a second API layer in Python, backed by five years of senior QA across AAA productions and live products. Page Object Model, UI and API coverage, and GitHub Actions CI on real applications, including a bank-transfer suite that found and documented a real overdraft-enforcement gap.",
+    "Five years of senior QA across AAA productions and live products. I build test automation on my own projects: Playwright and TypeScript with a Python API layer, Page Object Model, UI and API coverage, and GitHub Actions CI, including a bank-transfer suite that found and documented a real overdraft-enforcement gap. Looking to apply that professionally.",
   platforms: ["Automation", "API", "CI/CD", "Web", "Mobile", "VR", "Console"],
 };
 
