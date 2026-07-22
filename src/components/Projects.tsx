@@ -25,6 +25,22 @@ export function Projects() {
                     {cs.name}
                   </h3>
 
+                  {cs.stats && (
+                    <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
+                      {cs.stats.map((stat) => (
+                        <div key={stat.label} className="bg-surface px-4 py-4">
+                          <dt className="sr-only">{stat.label}</dt>
+                          <dd className="text-2xl font-semibold tracking-tight text-foreground">
+                            {stat.value}
+                          </dd>
+                          <p aria-hidden="true" className="mt-1 text-[13px] text-faint">
+                            {stat.label}
+                          </p>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+
                   <div className="mt-6 grid gap-8 md:grid-cols-[1fr_1.4fr]">
                     <div>
                       <h4 className="font-mono text-[13px] uppercase tracking-[0.15em] text-faint">
