@@ -31,13 +31,13 @@ const siteUrl = "https://bogdan-carcadea.ro";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: `${identity.name} — ${identity.role}`,
+  title: `${identity.name} · ${identity.role}`,
   description:
-    "Senior QA Engineer with 5+ years shipping large cross-platform software — quality strategy, release ownership, and a growing automation practice.",
+    "QA Automation Engineer building Playwright and TypeScript test frameworks with a Python API layer and CI/CD, backed by five years of senior QA across AAA and cross-platform software.",
   openGraph: {
-    title: `${identity.name} — ${identity.role}`,
+    title: `${identity.name} · ${identity.role}`,
     description:
-      "Quality strategy, release ownership, and test automation across desktop, console, mobile, browser, and VR.",
+      "Test automation in Playwright, TypeScript, and Python with GitHub Actions CI, backed by five years of senior QA across console, mobile, browser, and VR.",
     url: siteUrl,
     siteName: identity.name,
     locale: "en_US",

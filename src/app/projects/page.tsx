@@ -8,7 +8,7 @@ import { GalleryCard } from "@/components/GalleryCard";
 import { gallery, identity } from "@/content/site";
 
 export const metadata: Metadata = {
-  title: `Projects — ${identity.name}`,
+  title: `Projects · ${identity.name}`,
   description:
     "Every project I have worked on: AAA productions, mobile and VR products, and personal engineering projects.",
 };
